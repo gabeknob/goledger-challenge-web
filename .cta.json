@@ -1,5 +1,5 @@
 {
-  "projectName": "goledger-temp",
+  "projectName": "goledger-challenge-web",
   "mode": "file-router",
   "typescript": true,
   "tailwind": true,

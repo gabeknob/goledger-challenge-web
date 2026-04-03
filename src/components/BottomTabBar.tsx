@@ -1,5 +1,5 @@
-import { Link } from '@tanstack/react-router'
-import { Home, Tv, Bookmark } from 'lucide-react'
+import { Link } from "@tanstack/react-router";
+import { Home, Tv, Bookmark } from "lucide-react";
 
 export function BottomTabBar() {
   return (
@@ -29,5 +29,5 @@ export function BottomTabBar() {
         </Link>
       </div>
     </nav>
-  )
+  );
 }

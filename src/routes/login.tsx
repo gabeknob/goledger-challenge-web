@@ -1,23 +1,23 @@
-import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { loginSchema, type LoginFormValues } from '#/schemas/auth'
-import { isAuthenticated, setCredentials } from '#/lib/auth'
-import { Button } from '#/components/ui/button'
-import { Input } from '#/components/ui/input'
-import { Label } from '#/components/ui/label'
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema, type LoginFormValues } from "#/schemas/auth";
+import { isAuthenticated, setCredentials } from "#/lib/auth";
+import { Button } from "#/components/ui/button";
+import { Input } from "#/components/ui/input";
+import { Label } from "#/components/ui/label";
 
-export const Route = createFileRoute('/login')({
+export const Route = createFileRoute("/login")({
   beforeLoad: () => {
     if (isAuthenticated()) {
-      throw redirect({ to: '/' })
+      throw redirect({ to: "/" });
     }
   },
   component: LoginPage,
-})
+});
 
 function LoginPage() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const {
     register,
@@ -25,12 +25,12 @@ function LoginPage() {
     formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { username: '', password: '' },
-  })
+    defaultValues: { username: "", password: "" },
+  });
 
   function onSubmit(values: LoginFormValues) {
-    setCredentials(values.username, values.password)
-    navigate({ to: '/' })
+    setCredentials(values.username, values.password);
+    navigate({ to: "/" });
   }
 
   return (
@@ -40,12 +40,8 @@ function LoginPage() {
           <p className="mb-2 text-xs font-semibold tracking-widest uppercase text-muted-foreground">
             GoLedger TV
           </p>
-          <h1 className="display-title text-3xl font-bold text-foreground">
-            Welcome back
-          </h1>
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            Sign in to access the catalogue
-          </p>
+          <h1 className="display-title text-3xl font-bold text-foreground">Welcome back</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">Sign in to access the catalogue</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
@@ -55,7 +51,7 @@ function LoginPage() {
               id="username"
               autoComplete="username"
               aria-invalid={!!errors.username}
-              {...register('username')}
+              {...register("username")}
             />
             {errors.username && (
               <p className="text-sm text-destructive">{errors.username.message}</p>
@@ -69,7 +65,7 @@ function LoginPage() {
               type="password"
               autoComplete="current-password"
               aria-invalid={!!errors.password}
-              {...register('password')}
+              {...register("password")}
             />
             {errors.password && (
               <p className="text-sm text-destructive">{errors.password.message}</p>
@@ -82,5 +78,5 @@ function LoginPage() {
         </form>
       </div>
     </div>
-  )
+  );
 }

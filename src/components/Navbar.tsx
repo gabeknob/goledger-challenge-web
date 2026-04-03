@@ -1,9 +1,9 @@
-import { Link } from '@tanstack/react-router'
-import { useAuth } from '#/hooks/useAuth'
-import { Button } from '#/components/ui/button'
+import { Link } from "@tanstack/react-router";
+import { useAuth } from "#/hooks/useAuth";
+import { Button } from "#/components/ui/button";
 
 export function Navbar() {
-  const { logout } = useAuth()
+  const { logout } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
@@ -44,5 +44,5 @@ export function Navbar() {
         </Button>
       </nav>
     </header>
-  )
+  );
 }

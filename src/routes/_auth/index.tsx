@@ -1,8 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute('/_auth/')({
+export const Route = createFileRoute("/_auth/")({
   component: HomePage,
-})
+});
 
 function HomePage() {
   return (
@@ -10,5 +10,5 @@ function HomePage() {
       <h1 className="display-title text-3xl font-bold text-foreground">Home</h1>
       <p className="mt-2 text-muted-foreground">Dashboard coming soon.</p>
     </main>
-  )
+  );
 }

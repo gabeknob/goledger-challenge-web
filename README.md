@@ -28,7 +28,7 @@
 - [ ] TMDB poster caching via Zustand persist
 - [ ] Blockchain history panel on episode detail pages
 - [ ] Cursor-based pagination (CouchDB bookmark)
-- [ ] Claude integrations using skills for a comprehensive plan based on extensive stack and project decision session (Highlight `/grill-me`) 
+- [ ] Claude integrations using skills for a comprehensive plan based on extensive stack and project decision session (Highlight `/grill-me`)
 
 ## Compromises & production notes
 

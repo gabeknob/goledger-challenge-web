@@ -1,17 +1,17 @@
-import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
-import { isAuthenticated } from '#/lib/auth'
-import { Navbar } from '#/components/Navbar'
-import { BottomTabBar } from '#/components/BottomTabBar'
-import { Breadcrumbs } from '#/components/Breadcrumbs'
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { isAuthenticated } from "#/lib/auth";
+import { Navbar } from "#/components/Navbar";
+import { BottomTabBar } from "#/components/BottomTabBar";
+import { Breadcrumbs } from "#/components/Breadcrumbs";
 
-export const Route = createFileRoute('/_auth')({
+export const Route = createFileRoute("/_auth")({
   beforeLoad: () => {
     if (!isAuthenticated()) {
-      throw redirect({ to: '/login' })
+      throw redirect({ to: "/login" });
     }
   },
   component: AuthLayout,
-})
+});
 
 function AuthLayout() {
   return (
@@ -21,5 +21,5 @@ function AuthLayout() {
       <Outlet />
       <BottomTabBar />
     </div>
-  )
+  );
 }

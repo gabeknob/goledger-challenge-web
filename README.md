@@ -14,6 +14,10 @@
 
 ## How to run
 
+## Git strategy
+
+- [ ] Trunk-based development — short-lived `feat/` and `chore/` branches off `master`, merged via PR. `master` is always deployable. No long-lived branches.
+
 ## Architecture decisions
 
 - [ ] Why Vite + TanStack Router over Next.js

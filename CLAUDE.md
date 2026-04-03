@@ -26,7 +26,7 @@ IMDB-like TV Shows catalogue built on a Hyperledger Fabric blockchain API. Full 
 
 ## Asset schemas (confirmed via getSchema)
 
-- **tvShows** — key: `name` (string). Fields: `name`, `description`
+- **tvShows** — key: `title` (string). Fields: `title`, `description`, `recommendedAge` (optional)
 - **seasons** — composite key: `(number, tvShow→name)`. Fields: `number`, `tvShow`, `year`
 - **episodes** — composite key: `(season→(number, tvShow), episodeNumber)`. Fields: `season`, `episodeNumber`, `title`, `releaseDate`, `description`, `rating` (optional)
 - **watchlist** — key: `title` (string). Fields: `title`, `description`, `tvShows` (array of tvShow key refs)

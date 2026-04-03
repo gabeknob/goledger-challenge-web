@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { toast } from 'sonner'
-import { getCredentials } from '#/lib/auth'
+import { clearCredentials, getCredentials } from '#/lib/auth'
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -19,7 +19,15 @@ api.interceptors.response.use(
   (error) => {
     if (!error.response) {
       toast.error('Network error. Please check your connection.')
+      return Promise.reject(error)
     }
+
+    if (error.response.status === 401) {
+      clearCredentials()
+      toast.error('Invalid credentials. Please sign in again.')
+      window.location.href = '/login'
+    }
+
     return Promise.reject(error)
   },
 )

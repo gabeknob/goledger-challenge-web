@@ -7,7 +7,7 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-      <nav className="mx-auto flex max-w-5xl items-center gap-6 px-4 py-3">
+      <nav className="mx-auto flex max-w-7xl items-center gap-6 px-4 py-3">
         <Link to="/" className="display-title text-lg font-bold text-foreground no-underline">
           GoLedger TV
         </Link>

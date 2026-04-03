@@ -43,11 +43,11 @@ export function Breadcrumbs() {
   return (
     <div
       className={cn(
-        "border-b border-border bg-background/60 px-4 py-2",
+        "border-b border-border bg-background/60 py-2",
         rest.length === 0 && "hidden md:block",
       )}
     >
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-7xl px-4">
         {/* Mobile: immediate parent only */}
         {rest.length > 0 && (
           <Link

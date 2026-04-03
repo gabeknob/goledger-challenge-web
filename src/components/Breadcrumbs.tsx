@@ -7,6 +7,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '#/components/ui/breadcrumb'
+import {cn} from "#/lib/utils.ts";
 
 interface Crumb {
   label: string
@@ -40,7 +41,7 @@ export function Breadcrumbs() {
   const rest = crumbs.slice(0, -1)
 
   return (
-    <div className="border-b border-border bg-background/60 px-4 py-2">
+    <div className={cn("border-b border-border bg-background/60 px-4 py-2", rest.length === 0 && "hidden md:block")}>
       <div className="mx-auto max-w-5xl">
         {/* Mobile: immediate parent only */}
         {rest.length > 0 && (

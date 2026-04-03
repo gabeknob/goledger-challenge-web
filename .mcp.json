@@ -3,6 +3,14 @@
     "shadcn": {
       "command": "npx",
       "args": ["shadcn@latest", "mcp"]
+    },
+    "jetbrains": {
+      "type": "sse",
+      "url": "http://127.0.0.1:64342/sse"
+    },
+    "hugeicons": {
+      "command": "pnpm",
+      "args": ["dlx", "@hugeicons/mcp-server"]
     }
   }
 }

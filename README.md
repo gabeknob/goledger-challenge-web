@@ -1,4 +1,4 @@
-# GoLedger Challenge — TV Shows Catalogue
+# GoLedger Challenge — TV Shows Catalogue (Write final piece in Brazilian Portuguese)
 
 ## Stack
 
@@ -10,18 +10,20 @@
 - **Images:** TMDB API
 - **Testing:** Vitest + React Testing Library
 - **CI/CD:** GitHub Actions → AWS Elastic Beanstalk
+- **Devtools** JetBrains Webstorm + Claude Code
 
 ## How to run
 
 ## Architecture decisions
 
 - [ ] Why Vite + TanStack Router over Next.js
-- [ ] Authentication strategy: Basic Auth via cookies, credential gate layout
+- [ ] Authentication strategy: Basic Auth via cookies, credential gate layout (plain `lib/auth.ts` for outside-React contexts like `beforeLoad` guards + Axios interceptor; `useAuth` hook for React-aware actions like logout with cache invalidation)
 - [ ] No code generation (Orval) — manual types from getSchema
 - [ ] Responsive CRUD modals: Dialog on desktop, Sheet on mobile (Credenza)
 - [ ] TMDB poster caching via Zustand persist
 - [ ] Blockchain history panel on episode detail pages
 - [ ] Cursor-based pagination (CouchDB bookmark)
+- [ ] Claude integrations using skills for a comprehensive plan based on extensive stack and project decision session (Highlight `/grill-me`) 
 
 ## Compromises & production notes
 

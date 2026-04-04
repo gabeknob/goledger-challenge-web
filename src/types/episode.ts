@@ -14,3 +14,9 @@ export interface Episode {
   description: string;
   rating?: number;
 }
+
+export interface EpisodeHistoryEntry extends Episode {
+  _isDelete: boolean;
+  _timestamp: string;
+  _txId: string;
+}

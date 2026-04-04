@@ -100,6 +100,16 @@ async function invalidateEpisodeQueries() {
   });
 }
 
+async function invalidateUpdatedEpisodeQueries() {
+  await invalidateEpisodeQueries();
+  await queryClient.invalidateQueries({
+    queryKey: ["episode"],
+  });
+  await queryClient.invalidateQueries({
+    queryKey: ["episodeHistory"],
+  });
+}
+
 export function useCreateEpisode() {
   return useMutation({
     mutationFn: createEpisode,
@@ -110,7 +120,7 @@ export function useCreateEpisode() {
 export function useUpdateEpisode() {
   return useMutation({
     mutationFn: updateEpisode,
-    onSuccess: invalidateEpisodeQueries,
+    onSuccess: invalidateUpdatedEpisodeQueries,
   });
 }
 

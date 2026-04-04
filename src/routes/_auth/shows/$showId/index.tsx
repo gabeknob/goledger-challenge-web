@@ -12,6 +12,7 @@ import { DeleteEpisodeDialog } from "#/components/DeleteEpisodeDialog";
 import { DeleteSeasonDialog } from "#/components/DeleteSeasonDialog";
 import { DeleteShowDialog } from "#/components/DeleteShowDialog";
 import { EpisodeFormDialog } from "#/components/EpisodeFormDialog";
+import { RouteErrorState } from "#/components/RouteErrorState";
 import { SeasonFormDialog } from "#/components/SeasonFormDialog";
 import { ShowFormDialog } from "#/components/ShowFormDialog";
 import { Button } from "#/components/ui/button";
@@ -25,7 +26,7 @@ import {
 import { Skeleton } from "#/components/ui/skeleton";
 import { useEpisodes, useSeasons, useShow } from "#/hooks/useShowDetail";
 import { useShows } from "#/hooks/useShows";
-import { useTMDB } from "#/hooks/useTMDB";
+import { useTMDB, useTMDBEpisodeStill } from "#/hooks/useTMDB";
 import type { Episode } from "#/types/episode";
 import type { Season } from "#/types/season";
 import type { TvShow } from "#/types/tvShow";
@@ -39,7 +40,6 @@ type PosterStyleVariables = CSSProperties & {
 };
 
 export const Route = createFileRoute("/_auth/shows/$showId/")({
-  staticData: { crumb: "Show" },
   validateSearch: search => ({
     season:
       typeof search.season === "number"
@@ -47,9 +47,6 @@ export const Route = createFileRoute("/_auth/shows/$showId/")({
         : typeof search.season === "string" && search.season.trim()
           ? Number(search.season)
           : undefined,
-  }),
-  loader: ({ params }) => ({
-    crumb: decodeURIComponent(params.showId),
   }),
   component: ShowDetailPage,
 });
@@ -90,6 +87,19 @@ function ShowDetailPage() {
         : [],
     [activeSeason, episodes],
   );
+  const flattenedEpisodeNumbers = useMemo(() => {
+    return new Map(
+      episodes.map(episode => [
+        episode["@key"],
+        getFlattenedEpisodeNumber({
+          episodeNumber: episode.episodeNumber,
+          episodes,
+          seasonNumber: getSeasonNumberByKey(seasons, episode.season["@key"]),
+          seasons,
+        }),
+      ]),
+    );
+  }, [episodes, seasons]);
   const deletingSeasonEpisodes = useMemo(
     () =>
       deletingSeason
@@ -103,6 +113,21 @@ function ShowDetailPage() {
         "@key": show["@key"],
       } as const)
     : null;
+
+  if (!isShowLoading && isShowError) {
+    return (
+      <RouteErrorState
+        actionLabel="Back to shows"
+        description="This TV show doesn't exist or may have been removed."
+        onAction={() =>
+          navigate({
+            to: "/shows",
+          })
+        }
+        title="TV show not found"
+      />
+    );
+  }
 
   if (!search.season && seasons[0]) {
     return (
@@ -154,7 +179,7 @@ function ShowDetailPage() {
 
           {!isSeasonsLoading && !isSeasonsError && seasons.length > 0 ? (
             <>
-              <div className="flex flex-wrap gap-2 rounded-4xl border border-border bg-card/80 p-1">
+              <div className="grid grid-cols-2 gap-2 rounded-4xl border border-border bg-card/80 p-2 md:flex md:flex-wrap md:p-1">
                 {seasons.map(season => {
                   const isActive = season["@key"] === activeSeason?.["@key"];
                   const wrapperClassName = isActive
@@ -164,7 +189,7 @@ function ShowDetailPage() {
                   return (
                     <div
                       key={season["@key"]}
-                      className={`inline-flex min-h-10 items-stretch py-1 pl-1 pr-1 ${wrapperClassName}`}
+                      className={`inline-flex min-h-10 w-full min-w-0 items-stretch py-1 pl-1 pr-1 md:w-auto ${wrapperClassName}`}
                     >
                       <button
                         type="button"
@@ -173,9 +198,10 @@ function ShowDetailPage() {
                             to: "/shows/$showId",
                             params: { showId },
                             search: { season: season.number },
+                            resetScroll: false,
                           })
                         }
-                        className="h-full rounded-full px-3 py-2 text-sm font-medium text-shadow-md"
+                        className="h-full min-w-0 flex-1 rounded-full px-3 py-2 text-sm font-medium text-shadow-md"
                       >
                         Season {season.number}
                       </button>
@@ -223,10 +249,12 @@ function ShowDetailPage() {
               {!isEpisodesLoading && !isEpisodesError ? (
                 <EpisodeList
                   episodes={visibleEpisodes}
+                  flattenedEpisodeNumbers={flattenedEpisodeNumbers}
                   onAddEpisode={() => setCreatingEpisode(true)}
                   onDeleteEpisode={setDeletingEpisode}
                   onEditEpisode={setEditingEpisode}
                   season={activeSeason}
+                  showTitle={show?.title ?? decodedShowId}
                   showId={showId}
                 />
               ) : null}
@@ -251,6 +279,7 @@ function ShowDetailPage() {
             to: "/shows/$showId",
             params: { showId },
             search: { season: seasonNumber },
+            resetScroll: false,
           })
         }
         open={creatingSeason}
@@ -269,6 +298,7 @@ function ShowDetailPage() {
             to: "/shows/$showId",
             params: { showId },
             search: { season: seasonNumber },
+            resetScroll: false,
           })
         }
         open={Boolean(editingSeason)}
@@ -318,6 +348,7 @@ function ShowDetailPage() {
             search: {
               season: deletedSeasonWasActive ? remainingSeasons[0]?.number : activeSeason?.number,
             },
+            resetScroll: false,
           });
         }}
         onOpenChange={open => {
@@ -347,7 +378,6 @@ function ShowHero({
   fallbackTitle,
   posterUrl,
   isLoading,
-  isError,
   onEdit,
   onDelete,
 }: {
@@ -355,7 +385,6 @@ function ShowHero({
   fallbackTitle: string;
   posterUrl: string | null;
   isLoading: boolean;
-  isError: boolean;
   onEdit: () => void;
   onDelete: () => void;
 }) {
@@ -416,11 +445,6 @@ function ShowHero({
               {show?.description ?? "No description available."}
             </p>
           ) : null}
-          {isError ? (
-            <p className="text-sm font-medium text-shadow-sm text-white/80">
-              Failed to load this show.
-            </p>
-          ) : null}
         </div>
 
         <div className="flex flex-wrap gap-2 md:ml-auto md:self-end">
@@ -475,17 +499,21 @@ function getMobilePosterHeight(scrollY: number) {
 
 function EpisodeList({
   episodes,
+  flattenedEpisodeNumbers,
   onAddEpisode,
   onDeleteEpisode,
   onEditEpisode,
   season,
+  showTitle,
   showId,
 }: {
   episodes: Episode[];
+  flattenedEpisodeNumbers: Map<string, number>;
   onAddEpisode: () => void;
   onDeleteEpisode: (episode: Episode) => void;
   onEditEpisode: (episode: Episode) => void;
   season?: Season;
+  showTitle: string;
   showId: string;
 }) {
   if (!season) {
@@ -515,9 +543,11 @@ function EpisodeList({
         <EpisodeRow
           key={episode["@key"]}
           episode={episode}
+          fallbackEpisodeNumber={flattenedEpisodeNumbers.get(episode["@key"])}
           onDelete={onDeleteEpisode}
           onEdit={onEditEpisode}
           season={season}
+          showTitle={showTitle}
           showId={showId}
         />
       ))}
@@ -533,18 +563,27 @@ function EpisodeList({
 
 function EpisodeRow({
   episode,
+  fallbackEpisodeNumber,
   onDelete,
   onEdit,
   season,
+  showTitle,
   showId,
 }: {
   episode: Episode;
+  fallbackEpisodeNumber?: number;
   onDelete: (episode: Episode) => void;
   onEdit: (episode: Episode) => void;
   season: Season;
+  showTitle: string;
   showId: string;
 }) {
-  const { imageUrl: stillUrl } = useTMDB(episode.title, "still");
+  const { imageUrl: stillUrl } = useTMDBEpisodeStill({
+    episodeNumber: episode.episodeNumber,
+    fallbackEpisodeNumber,
+    seasonNumber: season.number,
+    showTitle,
+  });
 
   return (
     <Link
@@ -714,6 +753,36 @@ function getActiveSeason(seasons: Season[], requestedSeason?: number) {
   }
 
   return seasons[0];
+}
+
+function getFlattenedEpisodeNumber({
+  episodeNumber,
+  episodes,
+  seasonNumber,
+  seasons,
+}: {
+  episodeNumber: number;
+  episodes: Episode[];
+  seasonNumber: number;
+  seasons: Season[];
+}) {
+  if (seasonNumber <= 1) {
+    return episodeNumber;
+  }
+
+  const priorSeasonKeys = seasons
+    .filter(season => season.number < seasonNumber)
+    .map(season => season["@key"]);
+
+  const priorEpisodesCount = episodes.filter(episode =>
+    priorSeasonKeys.includes(episode.season["@key"]),
+  ).length;
+
+  return priorEpisodesCount + episodeNumber;
+}
+
+function getSeasonNumberByKey(seasons: Season[], seasonKey: string) {
+  return seasons.find(season => season["@key"] === seasonKey)?.number ?? 1;
 }
 
 function clamp(value: number, min: number, max: number) {

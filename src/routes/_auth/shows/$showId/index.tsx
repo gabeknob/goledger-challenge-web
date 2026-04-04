@@ -154,7 +154,7 @@ function ShowDetailPage() {
 
           {!isSeasonsLoading && !isSeasonsError && seasons.length > 0 ? (
             <>
-              <div className="flex flex-wrap gap-2 rounded-4xl border border-border bg-card/80 p-1">
+              <div className="grid grid-cols-2 gap-2 rounded-4xl border border-border bg-card/80 p-2 md:flex md:flex-wrap md:p-1">
                 {seasons.map(season => {
                   const isActive = season["@key"] === activeSeason?.["@key"];
                   const wrapperClassName = isActive
@@ -164,7 +164,7 @@ function ShowDetailPage() {
                   return (
                     <div
                       key={season["@key"]}
-                      className={`inline-flex min-h-10 items-stretch py-1 pl-1 pr-1 ${wrapperClassName}`}
+                      className={`inline-flex min-h-10 w-full min-w-0 items-stretch py-1 pl-1 pr-1 md:w-auto ${wrapperClassName}`}
                     >
                       <button
                         type="button"
@@ -173,9 +173,10 @@ function ShowDetailPage() {
                             to: "/shows/$showId",
                             params: { showId },
                             search: { season: season.number },
+                            resetScroll: false,
                           })
                         }
-                        className="h-full rounded-full px-3 py-2 text-sm font-medium text-shadow-md"
+                        className="h-full min-w-0 flex-1 rounded-full px-3 py-2 text-sm font-medium text-shadow-md"
                       >
                         Season {season.number}
                       </button>
@@ -251,6 +252,7 @@ function ShowDetailPage() {
             to: "/shows/$showId",
             params: { showId },
             search: { season: seasonNumber },
+            resetScroll: false,
           })
         }
         open={creatingSeason}
@@ -269,6 +271,7 @@ function ShowDetailPage() {
             to: "/shows/$showId",
             params: { showId },
             search: { season: seasonNumber },
+            resetScroll: false,
           })
         }
         open={Boolean(editingSeason)}
@@ -318,6 +321,7 @@ function ShowDetailPage() {
             search: {
               season: deletedSeasonWasActive ? remainingSeasons[0]?.number : activeSeason?.number,
             },
+            resetScroll: false,
           });
         }}
         onOpenChange={open => {

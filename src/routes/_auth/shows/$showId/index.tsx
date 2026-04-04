@@ -1,10 +1,17 @@
 import { useMemo, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { Link, Navigate, createFileRoute } from "@tanstack/react-router";
-import { Calendar03Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
+import {
+  Calendar03Icon,
+  Delete02Icon,
+  MoreHorizontalIcon,
+  PencilEdit02Icon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
+import { DeleteEpisodeDialog } from "#/components/DeleteEpisodeDialog";
 import { DeleteSeasonDialog } from "#/components/DeleteSeasonDialog";
 import { DeleteShowDialog } from "#/components/DeleteShowDialog";
+import { EpisodeFormDialog } from "#/components/EpisodeFormDialog";
 import { SeasonFormDialog } from "#/components/SeasonFormDialog";
 import { ShowFormDialog } from "#/components/ShowFormDialog";
 import { Button } from "#/components/ui/button";
@@ -26,7 +33,6 @@ import type { TvShow } from "#/types/tvShow";
 const MOBILE_POSTER_MIN_HEIGHT_REM = 18;
 const MOBILE_POSTER_MAX_HEIGHT_REM = 27;
 const MOBILE_POSTER_SCROLL_RANGE_PX = 220;
-
 type PosterStyleVariables = CSSProperties & {
   "--mobile-poster-height": string;
   "--mobile-poster-width": string;
@@ -55,7 +61,10 @@ function ShowDetailPage() {
   const navigate = Route.useNavigate();
   const { data: allShows = [] } = useShows();
   const [creatingSeason, setCreatingSeason] = useState(false);
+  const [creatingEpisode, setCreatingEpisode] = useState(false);
+  const [deletingEpisode, setDeletingEpisode] = useState<Episode | null>(null);
   const [deletingSeason, setDeletingSeason] = useState<Season | null>(null);
+  const [editingEpisode, setEditingEpisode] = useState<Episode | null>(null);
   const [editingSeason, setEditingSeason] = useState<Season | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -212,7 +221,14 @@ function ShowDetailPage() {
                 </p>
               ) : null}
               {!isEpisodesLoading && !isEpisodesError ? (
-                <EpisodeList episodes={visibleEpisodes} season={activeSeason} showId={showId} />
+                <EpisodeList
+                  episodes={visibleEpisodes}
+                  onAddEpisode={() => setCreatingEpisode(true)}
+                  onDeleteEpisode={setDeletingEpisode}
+                  onEditEpisode={setEditingEpisode}
+                  season={activeSeason}
+                  showId={showId}
+                />
               ) : null}
             </>
           ) : null}
@@ -258,6 +274,34 @@ function ShowDetailPage() {
         open={Boolean(editingSeason)}
         season={editingSeason}
         show={showReference}
+      />
+      <EpisodeFormDialog
+        existingEpisodes={visibleEpisodes}
+        mode="create"
+        onOpenChange={setCreatingEpisode}
+        open={creatingEpisode}
+        season={activeSeason ?? null}
+      />
+      <EpisodeFormDialog
+        existingEpisodes={visibleEpisodes}
+        mode="edit"
+        onOpenChange={open => {
+          if (!open) {
+            setEditingEpisode(null);
+          }
+        }}
+        open={Boolean(editingEpisode)}
+        episode={editingEpisode}
+        season={activeSeason ?? null}
+      />
+      <DeleteEpisodeDialog
+        episode={deletingEpisode}
+        onOpenChange={open => {
+          if (!open) {
+            setDeletingEpisode(null);
+          }
+        }}
+        open={Boolean(deletingEpisode)}
       />
       <DeleteSeasonDialog
         episodes={deletingSeasonEpisodes}
@@ -431,10 +475,16 @@ function getMobilePosterHeight(scrollY: number) {
 
 function EpisodeList({
   episodes,
+  onAddEpisode,
+  onDeleteEpisode,
+  onEditEpisode,
   season,
   showId,
 }: {
   episodes: Episode[];
+  onAddEpisode: () => void;
+  onDeleteEpisode: (episode: Episode) => void;
+  onEditEpisode: (episode: Episode) => void;
   season?: Season;
   showId: string;
 }) {
@@ -449,7 +499,10 @@ function EpisodeList({
         <p className="mt-2 text-sm text-muted-foreground">
           Season {season.number} is ready for its first episode.
         </p>
-        <Button className="mt-4" disabled>
+        <Button
+          className="mt-4 h-10 w-full text-sm font-semibold md:mx-auto md:w-auto md:px-5"
+          onClick={onAddEpisode}
+        >
           Add an Episode
         </Button>
       </div>
@@ -459,18 +512,35 @@ function EpisodeList({
   return (
     <div className="flex flex-col gap-3">
       {episodes.map(episode => (
-        <EpisodeRow key={episode["@key"]} episode={episode} season={season} showId={showId} />
+        <EpisodeRow
+          key={episode["@key"]}
+          episode={episode}
+          onDelete={onDeleteEpisode}
+          onEdit={onEditEpisode}
+          season={season}
+          showId={showId}
+        />
       ))}
+      <Button
+        className="mt-2 h-10 w-full text-sm font-semibold md:mx-auto md:w-auto md:px-5"
+        onClick={onAddEpisode}
+      >
+        Add Episode
+      </Button>
     </div>
   );
 }
 
 function EpisodeRow({
   episode,
+  onDelete,
+  onEdit,
   season,
   showId,
 }: {
   episode: Episode;
+  onDelete: (episode: Episode) => void;
+  onEdit: (episode: Episode) => void;
   season: Season;
   showId: string;
 }) {
@@ -483,9 +553,37 @@ function EpisodeRow({
         showId,
         episode: `s${season.number}e${episode.episodeNumber}`,
       }}
-      className="block"
+      className="group relative block"
     >
-      <article className="grid gap-4 rounded-3xl border border-border bg-card/80 p-4 transition-colors hover:bg-card md:grid-cols-[10rem_1fr]">
+      <div className="pointer-events-none absolute right-3 top-3 z-10 hidden items-center gap-1 rounded-lg border border-border/60 bg-background/92 p-1 shadow-sm backdrop-blur opacity-0 transition-all duration-200 md:flex md:group-hover:pointer-events-auto md:group-hover:opacity-100">
+        <Button
+          size="xs"
+          variant="ghost"
+          className="text-[0.65rem] uppercase tracking-[0.12em]"
+          onClick={event => {
+            event.preventDefault();
+            event.stopPropagation();
+            onEdit(episode);
+          }}
+        >
+          <HugeiconsIcon icon={PencilEdit02Icon} className="size-3.5" />
+          <span>Edit</span>
+        </Button>
+        <Button
+          size="xs"
+          variant="destructive"
+          className="text-[0.65rem] uppercase tracking-[0.12em]"
+          onClick={event => {
+            event.preventDefault();
+            event.stopPropagation();
+            onDelete(episode);
+          }}
+        >
+          <HugeiconsIcon icon={Delete02Icon} className="size-3.5" />
+          <span>Delete</span>
+        </Button>
+      </div>
+      <article className="grid gap-4 rounded-4xl border border-border bg-card/80 p-4 transition-colors hover:bg-card md:grid-cols-[10rem_1fr]">
         <div className="relative aspect-video overflow-hidden rounded-2xl">
           {stillUrl ? (
             <img
@@ -498,6 +596,45 @@ function EpisodeRow({
             <div className={`absolute inset-0 ${getEpisodeTone(episode.title)}`} />
           )}
           <div className="absolute inset-0 bg-linear-to-t from-foreground/30 via-transparent to-transparent" />
+          <div className="absolute right-1.5 top-1.5 z-10 md:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="rounded-full border border-muted-foreground/40 bg-muted text-muted-foreground shadow-xl hover:bg-muted/90 hover:text-muted-foreground"
+                  onClick={event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                  }}
+                >
+                  <HugeiconsIcon icon={MoreHorizontalIcon} className="size-4" />
+                  <span className="sr-only">Episode actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-32">
+                <DropdownMenuGroup>
+                  <DropdownMenuItem
+                    onSelect={event => {
+                      event.preventDefault();
+                      onEdit(episode);
+                    }}
+                  >
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onSelect={event => {
+                      event.preventDefault();
+                      onDelete(episode);
+                    }}
+                  >
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
         <div className="flex flex-col gap-2">
           <div className="flex flex-wrap items-center gap-2">

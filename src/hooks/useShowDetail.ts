@@ -7,6 +7,7 @@ import type { SearchResponse, TvShow } from "#/types/tvShow";
 
 export const getShowDetailQueryKey = (showTitle: string) => ["show", showTitle] as const;
 export const getSeasonsQueryKey = (showKey?: string) => ["seasons", showKey] as const;
+export const getEpisodesRootQueryKey = () => ["episodes"] as const;
 export const getEpisodesQueryKey = (seasonKeys: string[]) => ["episodes", ...seasonKeys] as const;
 
 async function fetchShow(showTitle: string): Promise<TvShow> {

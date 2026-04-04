@@ -13,9 +13,15 @@ import { EpisodeFormDialog } from "#/components/EpisodeFormDialog";
 import { RouteErrorState } from "#/components/RouteErrorState";
 import { Button } from "#/components/ui/button";
 import { Skeleton } from "#/components/ui/skeleton";
-import { useEpisode, useEpisodeHistory, useEpisodes, useShow } from "#/hooks/useShowDetail";
+import {
+  useEpisode,
+  useEpisodeHistory,
+  useEpisodes,
+  useSeasons,
+  useShow,
+} from "#/hooks/useShowDetail";
 import type { EpisodeHistoryEntry } from "#/types/episode";
-import { useTMDB } from "#/hooks/useTMDB";
+import { useTMDBEpisodeStill } from "#/hooks/useTMDB";
 
 const EPISODE_PARAM_PATTERN = /^s(\d+)e(\d+)$/i;
 
@@ -46,14 +52,30 @@ function EpisodeDetailPage() {
   const [historyOpen, setHistoryOpen] = useState(false);
 
   const { data: show, isError: isShowError, isLoading: isShowLoading } = useShow(decodedShowId);
+  const { data: seasons = [] } = useSeasons(show?.["@key"]);
+  const seasonKeys = seasons.map(season => season["@key"]);
+  const { data: allEpisodes = [] } = useEpisodes(seasonKeys);
   const {
     data: episode,
     error: episodeError,
     isError: isEpisodeError,
     isLoading: isEpisodeLoading,
   } = useEpisode(show?.["@key"], seasonNumber, episodeNumber);
-  const { imageUrl: stillUrl } = useTMDB(episode?.title ?? "", "still");
-  const { data: siblingEpisodes = [] } = useEpisodes(episode ? [episode.season["@key"]] : []);
+  const fallbackEpisodeNumber = getFlattenedEpisodeNumber({
+    episodeNumber,
+    episodes: allEpisodes,
+    seasonNumber,
+    seasons,
+  });
+  const { imageUrl: stillUrl } = useTMDBEpisodeStill({
+    episodeNumber,
+    fallbackEpisodeNumber,
+    seasonNumber,
+    showTitle: show?.title ?? decodedShowId,
+  });
+  const siblingEpisodes = episode
+    ? allEpisodes.filter(entry => entry.season["@key"] === episode.season["@key"])
+    : [];
   const {
     data: historyEntries = [],
     error: historyError,
@@ -574,6 +596,40 @@ function getHistorySnapshot(entry: EpisodeHistoryEntry) {
   delete snapshot._txId;
 
   return snapshot;
+}
+
+function getFlattenedEpisodeNumber({
+  episodeNumber,
+  episodes,
+  seasonNumber,
+  seasons,
+}: {
+  episodeNumber: number;
+  episodes: {
+    episodeNumber: number;
+    season: {
+      "@key": string;
+    };
+  }[];
+  seasonNumber: number;
+  seasons: {
+    "@key": string;
+    number: number;
+  }[];
+}) {
+  if (seasonNumber <= 1) {
+    return episodeNumber;
+  }
+
+  const priorSeasonKeys = seasons
+    .filter(season => season.number < seasonNumber)
+    .map(season => season["@key"]);
+
+  const priorEpisodesCount = episodes.filter(episode =>
+    priorSeasonKeys.includes(episode.season["@key"]),
+  ).length;
+
+  return priorEpisodesCount + episodeNumber;
 }
 
 function hashString(value: string) {

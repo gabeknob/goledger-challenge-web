@@ -26,7 +26,7 @@ import {
 import { Skeleton } from "#/components/ui/skeleton";
 import { useEpisodes, useSeasons, useShow } from "#/hooks/useShowDetail";
 import { useShows } from "#/hooks/useShows";
-import { useTMDB } from "#/hooks/useTMDB";
+import { useTMDB, useTMDBEpisodeStill } from "#/hooks/useTMDB";
 import type { Episode } from "#/types/episode";
 import type { Season } from "#/types/season";
 import type { TvShow } from "#/types/tvShow";
@@ -87,6 +87,19 @@ function ShowDetailPage() {
         : [],
     [activeSeason, episodes],
   );
+  const flattenedEpisodeNumbers = useMemo(() => {
+    return new Map(
+      episodes.map(episode => [
+        episode["@key"],
+        getFlattenedEpisodeNumber({
+          episodeNumber: episode.episodeNumber,
+          episodes,
+          seasonNumber: getSeasonNumberByKey(seasons, episode.season["@key"]),
+          seasons,
+        }),
+      ]),
+    );
+  }, [episodes, seasons]);
   const deletingSeasonEpisodes = useMemo(
     () =>
       deletingSeason
@@ -236,10 +249,12 @@ function ShowDetailPage() {
               {!isEpisodesLoading && !isEpisodesError ? (
                 <EpisodeList
                   episodes={visibleEpisodes}
+                  flattenedEpisodeNumbers={flattenedEpisodeNumbers}
                   onAddEpisode={() => setCreatingEpisode(true)}
                   onDeleteEpisode={setDeletingEpisode}
                   onEditEpisode={setEditingEpisode}
                   season={activeSeason}
+                  showTitle={show?.title ?? decodedShowId}
                   showId={showId}
                 />
               ) : null}
@@ -484,17 +499,21 @@ function getMobilePosterHeight(scrollY: number) {
 
 function EpisodeList({
   episodes,
+  flattenedEpisodeNumbers,
   onAddEpisode,
   onDeleteEpisode,
   onEditEpisode,
   season,
+  showTitle,
   showId,
 }: {
   episodes: Episode[];
+  flattenedEpisodeNumbers: Map<string, number>;
   onAddEpisode: () => void;
   onDeleteEpisode: (episode: Episode) => void;
   onEditEpisode: (episode: Episode) => void;
   season?: Season;
+  showTitle: string;
   showId: string;
 }) {
   if (!season) {
@@ -524,9 +543,11 @@ function EpisodeList({
         <EpisodeRow
           key={episode["@key"]}
           episode={episode}
+          fallbackEpisodeNumber={flattenedEpisodeNumbers.get(episode["@key"])}
           onDelete={onDeleteEpisode}
           onEdit={onEditEpisode}
           season={season}
+          showTitle={showTitle}
           showId={showId}
         />
       ))}
@@ -542,18 +563,27 @@ function EpisodeList({
 
 function EpisodeRow({
   episode,
+  fallbackEpisodeNumber,
   onDelete,
   onEdit,
   season,
+  showTitle,
   showId,
 }: {
   episode: Episode;
+  fallbackEpisodeNumber?: number;
   onDelete: (episode: Episode) => void;
   onEdit: (episode: Episode) => void;
   season: Season;
+  showTitle: string;
   showId: string;
 }) {
-  const { imageUrl: stillUrl } = useTMDB(episode.title, "still");
+  const { imageUrl: stillUrl } = useTMDBEpisodeStill({
+    episodeNumber: episode.episodeNumber,
+    fallbackEpisodeNumber,
+    seasonNumber: season.number,
+    showTitle,
+  });
 
   return (
     <Link
@@ -723,6 +753,36 @@ function getActiveSeason(seasons: Season[], requestedSeason?: number) {
   }
 
   return seasons[0];
+}
+
+function getFlattenedEpisodeNumber({
+  episodeNumber,
+  episodes,
+  seasonNumber,
+  seasons,
+}: {
+  episodeNumber: number;
+  episodes: Episode[];
+  seasonNumber: number;
+  seasons: Season[];
+}) {
+  if (seasonNumber <= 1) {
+    return episodeNumber;
+  }
+
+  const priorSeasonKeys = seasons
+    .filter(season => season.number < seasonNumber)
+    .map(season => season["@key"]);
+
+  const priorEpisodesCount = episodes.filter(episode =>
+    priorSeasonKeys.includes(episode.season["@key"]),
+  ).length;
+
+  return priorEpisodesCount + episodeNumber;
+}
+
+function getSeasonNumberByKey(seasons: Season[], seasonKey: string) {
+  return seasons.find(season => season["@key"] === seasonKey)?.number ?? 1;
 }
 
 function clamp(value: number, min: number, max: number) {

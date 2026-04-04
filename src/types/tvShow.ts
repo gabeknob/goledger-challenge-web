@@ -7,7 +7,7 @@ export interface TvShow {
   "@lastUpdated"?: string;
   title: string;
   description: string;
-  recommendedAge?: number;
+  recommendedAge: number;
 }
 
 export interface SearchResponse<T> {

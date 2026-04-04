@@ -57,7 +57,7 @@ export function Breadcrumbs() {
             to={rest[rest.length - 1].href as never}
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground md:hidden"
           >
-            <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
+            <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
             <span>{rest[rest.length - 1].label}</span>
           </Link>
         )}

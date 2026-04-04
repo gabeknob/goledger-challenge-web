@@ -1,11 +1,20 @@
 import { useMemo, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { Link, Navigate, createFileRoute } from "@tanstack/react-router";
-import { Calendar03Icon } from "@hugeicons/core-free-icons";
+import { Calendar03Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
+import { DeleteSeasonDialog } from "#/components/DeleteSeasonDialog";
 import { DeleteShowDialog } from "#/components/DeleteShowDialog";
+import { SeasonFormDialog } from "#/components/SeasonFormDialog";
 import { ShowFormDialog } from "#/components/ShowFormDialog";
 import { Button } from "#/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "#/components/ui/dropdown-menu";
 import { Skeleton } from "#/components/ui/skeleton";
 import { useEpisodes, useSeasons, useShow } from "#/hooks/useShowDetail";
 import { useShows } from "#/hooks/useShows";
@@ -40,6 +49,9 @@ function ShowDetailPage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const { data: allShows = [] } = useShows();
+  const [creatingSeason, setCreatingSeason] = useState(false);
+  const [deletingSeason, setDeletingSeason] = useState<Season | null>(null);
+  const [editingSeason, setEditingSeason] = useState<Season | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
@@ -64,6 +76,19 @@ function ShowDetailPage() {
         : [],
     [activeSeason, episodes],
   );
+  const deletingSeasonEpisodes = useMemo(
+    () =>
+      deletingSeason
+        ? episodes.filter(episode => episode.season["@key"] === deletingSeason["@key"])
+        : [],
+    [deletingSeason, episodes],
+  );
+  const showReference = show
+    ? ({
+        "@assetType": "tvShows",
+        "@key": show["@key"],
+      } as const)
+    : null;
 
   if (!search.season && seasons[0]) {
     return (
@@ -99,7 +124,9 @@ function ShowDetailPage() {
                 Browse the catalogue
               </h2>
             </div>
-            <Button disabled>Add Season</Button>
+            <Button onClick={() => setCreatingSeason(true)} disabled={!show}>
+              Add Season
+            </Button>
           </div>
 
           {isSeasonsLoading ? <SeasonTabsSkeleton /> : null}
@@ -108,34 +135,67 @@ function ShowDetailPage() {
           ) : null}
 
           {!isSeasonsLoading && !isSeasonsError && seasons.length === 0 ? (
-            <EmptySeasonState />
+            <EmptySeasonState disabled={!show} onAddSeason={() => setCreatingSeason(true)} />
           ) : null}
 
           {!isSeasonsLoading && !isSeasonsError && seasons.length > 0 ? (
             <>
-              <div className="flex flex-wrap gap-2 rounded-3xl border border-border bg-card/80 p-2">
+              <div className="flex flex-wrap gap-2 rounded-4xl border border-border bg-card/80 p-1">
                 {seasons.map(season => {
                   const isActive = season["@key"] === activeSeason?.["@key"];
+                  const wrapperClassName = isActive
+                    ? "rounded-full bg-primary text-primary-foreground"
+                    : "rounded-full bg-muted text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground";
 
                   return (
-                    <button
+                    <div
                       key={season["@key"]}
-                      type="button"
-                      onClick={() =>
-                        navigate({
-                          to: "/shows/$showId",
-                          params: { showId },
-                          search: { season: season.number },
-                        })
-                      }
-                      className={
-                        isActive
-                          ? "rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground text-shadow-md"
-                          : "rounded-full bg-muted px-4 py-2 text-sm font-medium text-muted-foreground text-shadow-md transition-colors hover:bg-secondary hover:text-foreground"
-                      }
+                      className={`inline-flex min-h-10 items-stretch py-1 pl-1 pr-1 ${wrapperClassName}`}
                     >
-                      Season {season.number}
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          navigate({
+                            to: "/shows/$showId",
+                            params: { showId },
+                            search: { season: season.number },
+                          })
+                        }
+                        className="h-full rounded-full px-3 py-2 text-sm font-medium text-shadow-md"
+                      >
+                        Season {season.number}
+                      </button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="xs"
+                            className={`h-full min-h-0 self-stretch overflow-hidden rounded-full bg-white text-[0.65rem] font-semibold tracking-[0.12em] uppercase text-primary shadow-sm transition-all duration-200 ease-out hover:text-foreground hover:border-foreground ${
+                              isActive
+                                ? "ml-0.5 max-w-24 px-2.5 opacity-100"
+                                : "pointer-events-none ml-0 max-w-0 px-0 opacity-0"
+                            }`}
+                          >
+                            <HugeiconsIcon icon={PencilEdit02Icon} className="size-3.5" />
+                            <span>Edit</span>
+                            <span className="sr-only">Season actions</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="min-w-32">
+                          <DropdownMenuGroup>
+                            <DropdownMenuItem onSelect={() => setEditingSeason(season)}>
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              variant="destructive"
+                              onSelect={() => setDeletingSeason(season)}
+                            >
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   );
                 })}
               </div>
@@ -160,6 +220,64 @@ function ShowDetailPage() {
         open={isEditOpen}
         onOpenChange={setIsEditOpen}
         show={show}
+      />
+      <SeasonFormDialog
+        existingSeasons={seasons}
+        mode="create"
+        onOpenChange={setCreatingSeason}
+        onSubmitted={seasonNumber =>
+          navigate({
+            to: "/shows/$showId",
+            params: { showId },
+            search: { season: seasonNumber },
+          })
+        }
+        open={creatingSeason}
+        show={showReference}
+      />
+      <SeasonFormDialog
+        existingSeasons={seasons}
+        mode="edit"
+        onOpenChange={open => {
+          if (!open) {
+            setEditingSeason(null);
+          }
+        }}
+        onSubmitted={seasonNumber =>
+          navigate({
+            to: "/shows/$showId",
+            params: { showId },
+            search: { season: seasonNumber },
+          })
+        }
+        open={Boolean(editingSeason)}
+        season={editingSeason}
+        show={showReference}
+      />
+      <DeleteSeasonDialog
+        episodes={deletingSeasonEpisodes}
+        onDeleted={() => {
+          const deletedSeasonWasActive = deletingSeason?.["@key"] === activeSeason?.["@key"];
+          const remainingSeasons = seasons.filter(
+            season => season["@key"] !== deletingSeason?.["@key"],
+          );
+
+          setDeletingSeason(null);
+          navigate({
+            to: "/shows/$showId",
+            params: { showId },
+            search: {
+              season: deletedSeasonWasActive ? remainingSeasons[0]?.number : activeSeason?.number,
+            },
+          });
+        }}
+        onOpenChange={open => {
+          if (!open) {
+            setDeletingSeason(null);
+          }
+        }}
+        open={Boolean(deletingSeason)}
+        season={deletingSeason}
       />
       <DeleteShowDialog
         open={isDeleteOpen}
@@ -390,7 +508,7 @@ function EpisodeRow({
           <h3 className="text-lg font-semibold text-foreground">{episode.title}</h3>
           <p className="line-clamp-2 text-sm text-muted-foreground">{episode.description}</p>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <HugeiconsIcon icon={Calendar03Icon} size={14} />
+            <HugeiconsIcon icon={Calendar03Icon} className="size-3.5" />
             <span>{formatDate(episode.releaseDate)}</span>
           </div>
         </div>
@@ -430,12 +548,18 @@ function EpisodeListSkeleton() {
   );
 }
 
-function EmptySeasonState() {
+function EmptySeasonState({
+  disabled,
+  onAddSeason,
+}: {
+  disabled: boolean;
+  onAddSeason: () => void;
+}) {
   return (
     <div className="rounded-3xl border border-dashed border-border bg-card/50 px-6 py-12 text-center">
       <p className="display-title text-2xl font-semibold text-foreground">No seasons yet</p>
       <p className="mt-2 text-sm text-muted-foreground">This show is ready for its first season.</p>
-      <Button className="mt-4" disabled>
+      <Button className="mt-4" disabled={disabled} onClick={onAddSeason}>
         Add a Season
       </Button>
     </div>

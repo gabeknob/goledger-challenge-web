@@ -10,6 +10,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 
 import { DeleteEpisodeDialog } from "#/components/DeleteEpisodeDialog";
 import { EpisodeFormDialog } from "#/components/EpisodeFormDialog";
+import { RouteErrorState } from "#/components/RouteErrorState";
 import { Button } from "#/components/ui/button";
 import { Skeleton } from "#/components/ui/skeleton";
 import { useEpisode, useEpisodeHistory, useEpisodes, useShow } from "#/hooks/useShowDetail";
@@ -44,7 +45,7 @@ function EpisodeDetailPage() {
   const [deletingEpisodeOpen, setDeletingEpisodeOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
 
-  const { data: show } = useShow(decodedShowId);
+  const { data: show, isError: isShowError, isLoading: isShowLoading } = useShow(decodedShowId);
   const {
     data: episode,
     error: episodeError,
@@ -60,6 +61,43 @@ function EpisodeDetailPage() {
     isLoading: isHistoryLoading,
   } = useEpisodeHistory(episode);
 
+  if (!isShowLoading && isShowError) {
+    return (
+      <RouteErrorState
+        actionLabel="Back to shows"
+        description="This TV show doesn't exist or may have been removed."
+        onAction={() =>
+          navigate({
+            to: "/shows",
+          })
+        }
+        title="TV show not found"
+      />
+    );
+  }
+
+  if (!isEpisodeLoading && isEpisodeError) {
+    return (
+      <RouteErrorState
+        actionLabel={`Back to ${decodedShowId}`}
+        description={
+          episodeError instanceof Error
+            ? episodeError.message
+            : "This episode doesn't exist or may have been removed."
+        }
+        onAction={() =>
+          navigate({
+            to: "/shows/$showId",
+            params: { showId },
+            search: { season: seasonNumber },
+            resetScroll: false,
+          })
+        }
+        title="Episode not found"
+      />
+    );
+  }
+
   return (
     <main className="pb-16 md:pb-10">
       <EpisodeHeader
@@ -71,29 +109,15 @@ function EpisodeDetailPage() {
         onDelete={() => setDeletingEpisodeOpen(true)}
         onEdit={() => setEditingEpisodeOpen(true)}
       />
-
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8">
-        {isEpisodeError ? (
-          <section className="rounded-4xl border border-destructive/20 bg-destructive/5 px-6 py-5">
-            <p className="text-sm font-medium text-destructive">
-              {episodeError instanceof Error
-                ? episodeError.message
-                : "Could not load this episode."}
-            </p>
-          </section>
-        ) : null}
-
-        {!isEpisodeError ? (
-          <section className="grid gap-4 md:grid-cols-[minmax(0,1.65fr)_minmax(19rem,1fr)]">
-            <EpisodeDescriptionCard episode={episode ?? null} isLoading={isEpisodeLoading} />
-            <EpisodeMetaCard
-              episode={episode ?? null}
-              showTitle={decodedShowId}
-              isLoading={isEpisodeLoading}
-            />
-          </section>
-        ) : null}
-
+        <section className="grid gap-4 md:grid-cols-[minmax(0,1.65fr)_minmax(19rem,1fr)]">
+          <EpisodeDescriptionCard episode={episode ?? null} isLoading={isEpisodeLoading} />
+          <EpisodeMetaCard
+            episode={episode ?? null}
+            showTitle={decodedShowId}
+            isLoading={isEpisodeLoading}
+          />
+        </section>
         <EpisodeHistoryPanel
           entries={historyEntries}
           error={historyError}

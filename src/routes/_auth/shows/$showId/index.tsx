@@ -12,6 +12,7 @@ import { DeleteEpisodeDialog } from "#/components/DeleteEpisodeDialog";
 import { DeleteSeasonDialog } from "#/components/DeleteSeasonDialog";
 import { DeleteShowDialog } from "#/components/DeleteShowDialog";
 import { EpisodeFormDialog } from "#/components/EpisodeFormDialog";
+import { RouteErrorState } from "#/components/RouteErrorState";
 import { SeasonFormDialog } from "#/components/SeasonFormDialog";
 import { ShowFormDialog } from "#/components/ShowFormDialog";
 import { Button } from "#/components/ui/button";
@@ -99,6 +100,21 @@ function ShowDetailPage() {
         "@key": show["@key"],
       } as const)
     : null;
+
+  if (!isShowLoading && isShowError) {
+    return (
+      <RouteErrorState
+        actionLabel="Back to shows"
+        description="This TV show doesn't exist or may have been removed."
+        onAction={() =>
+          navigate({
+            to: "/shows",
+          })
+        }
+        title="TV show not found"
+      />
+    );
+  }
 
   if (!search.season && seasons[0]) {
     return (
@@ -347,7 +363,6 @@ function ShowHero({
   fallbackTitle,
   posterUrl,
   isLoading,
-  isError,
   onEdit,
   onDelete,
 }: {
@@ -355,7 +370,6 @@ function ShowHero({
   fallbackTitle: string;
   posterUrl: string | null;
   isLoading: boolean;
-  isError: boolean;
   onEdit: () => void;
   onDelete: () => void;
 }) {
@@ -414,11 +428,6 @@ function ShowHero({
           {!isLoading ? (
             <p className="max-w-2xl text-sm leading-7 text-shadow-sm text-white/88 md:text-base">
               {show?.description ?? "No description available."}
-            </p>
-          ) : null}
-          {isError ? (
-            <p className="text-sm font-medium text-shadow-sm text-white/80">
-              Failed to load this show.
             </p>
           ) : null}
         </div>

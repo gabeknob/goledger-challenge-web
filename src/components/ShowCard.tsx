@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { MoreHorizontalIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { useTMDB } from "#/hooks/useTMDB";
 import { Button } from "#/components/ui/button";
 import { Card, CardContent } from "#/components/ui/card";
 import {
@@ -20,13 +21,27 @@ interface ShowCardProps {
 
 export function ShowCard({ show, onEdit, onDelete }: ShowCardProps) {
   const showId = encodeURIComponent(show.title);
+  const { imageUrl } = useTMDB(show.title);
+  const fallbackTone = getPosterFallbackTone(show.title);
 
   return (
     <Card className="group relative flex flex-col pt-0 overflow-hidden transition-shadow hover:shadow-md">
       <Link to="/shows/$showId" params={{ showId }} className="flex flex-col flex-1">
-        <div className="aspect-[2/3] w-full bg-muted" />
+        <div className={`relative aspect-[2/3] w-full overflow-hidden ${fallbackTone}`}>
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={`${show.title} poster`}
+              className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+              loading="lazy"
+            />
+          ) : null}
+          <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/10 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 p-3">
+            <p className="line-clamp-2 text-sm font-semibold text-background">{show.title}</p>
+          </div>
+        </div>
         <CardContent className="flex flex-1 flex-col gap-1 p-3">
-          <p className="line-clamp-1 font-semibold leading-snug">{show.title}</p>
           <p className="line-clamp-2 text-xs text-muted-foreground">{show.description}</p>
         </CardContent>
       </Link>
@@ -56,6 +71,23 @@ export function ShowCard({ show, onEdit, onDelete }: ShowCardProps) {
       </div>
     </Card>
   );
+}
+
+function getPosterFallbackTone(title: string) {
+  const fallbackTones = [
+    "bg-gradient-to-br from-primary via-chart-3 to-chart-2",
+    "bg-gradient-to-br from-chart-4 via-primary to-secondary",
+    "bg-gradient-to-br from-chart-2 via-chart-4 to-primary",
+    "bg-gradient-to-br from-foreground via-chart-4 to-primary",
+  ];
+
+  let hash = 0;
+  for (const character of title) {
+    hash = (hash << 5) - hash + character.charCodeAt(0);
+    hash |= 0;
+  }
+
+  return fallbackTones[Math.abs(hash) % fallbackTones.length];
 }
 
 export function ShowCardSkeleton() {

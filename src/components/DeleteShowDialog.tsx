@@ -18,9 +18,10 @@ interface DeleteShowDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   show: TvShow | null;
+  onDeleted?: () => void;
 }
 
-export function DeleteShowDialog({ open, onOpenChange, show }: DeleteShowDialogProps) {
+export function DeleteShowDialog({ open, onOpenChange, show, onDeleted }: DeleteShowDialogProps) {
   const deleteShow = useDeleteShow();
 
   async function handleDelete() {
@@ -32,6 +33,7 @@ export function DeleteShowDialog({ open, onOpenChange, show }: DeleteShowDialogP
       await deleteShow.mutateAsync(show);
       toast.success(`"${show.title}" was removed from the catalogue.`);
       onOpenChange(false);
+      onDeleted?.();
     } catch (error) {
       const message = getApiErrorMessage(error, "Could not delete the TV show.");
 

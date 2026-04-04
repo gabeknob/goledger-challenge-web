@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { getShowDetailQueryKey } from "#/hooks/useShowDetail";
 import { api } from "#/lib/api";
 import { queryClient } from "#/lib/queryClient";
 import type { SearchResponse, TvShow } from "#/types/tvShow";
@@ -98,8 +99,11 @@ export function useCreateShow() {
 export function useUpdateShow() {
   return useMutation({
     mutationFn: updateShow,
-    onSuccess: async () => {
+    onSuccess: async (_, variables) => {
       await queryClient.invalidateQueries({ queryKey: showQueryKey });
+      await queryClient.invalidateQueries({
+        queryKey: getShowDetailQueryKey(variables.current.title),
+      });
     },
   });
 }

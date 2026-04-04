@@ -7,6 +7,8 @@ import {
   SortByUp01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { DeleteShowDialog } from "#/components/DeleteShowDialog";
+import { ShowFormDialog } from "#/components/ShowFormDialog";
 import { ShowCard, ShowCardSkeleton } from "#/components/ShowCard";
 import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
@@ -18,6 +20,7 @@ import {
   SelectValue,
 } from "#/components/ui/select";
 import { useShows } from "#/hooks/useShows";
+import type { TvShow } from "#/types/tvShow";
 
 export const Route = createFileRoute("/_auth/shows/")({
   staticData: { crumb: "Shows" },
@@ -30,6 +33,9 @@ function ShowsPage() {
   const { data: shows, isLoading, isError } = useShows();
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOrder>("az");
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [editingShow, setEditingShow] = useState<TvShow | null>(null);
+  const [deletingShow, setDeletingShow] = useState<TvShow | null>(null);
 
   const filtered = (shows ?? [])
     .filter(s => s.title.toLowerCase().includes(search.toLowerCase()))
@@ -37,12 +43,13 @@ function ShowsPage() {
       if (sort === "az") return a.title.localeCompare(b.title);
       return b.title.localeCompare(a.title);
     });
+  const allShows = shows ?? [];
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-10">
       <div className="mb-6 flex items-center justify-between gap-4">
         <h1 className="display-title text-3xl font-bold text-foreground">Shows</h1>
-        <Button disabled>New Show</Button>
+        <Button onClick={() => setIsCreateOpen(true)}>New Show</Button>
       </div>
 
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -122,10 +129,44 @@ function ShowsPage() {
       {!isLoading && !isError && filtered.length > 0 && (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {filtered.map(show => (
-            <ShowCard key={show["@key"]} show={show} />
+            <ShowCard
+              key={show["@key"]}
+              show={show}
+              onEdit={setEditingShow}
+              onDelete={setDeletingShow}
+            />
           ))}
         </div>
       )}
+
+      <ShowFormDialog
+        existingShows={allShows}
+        mode="create"
+        open={isCreateOpen}
+        onOpenChange={setIsCreateOpen}
+      />
+
+      <ShowFormDialog
+        existingShows={allShows}
+        mode="edit"
+        open={Boolean(editingShow)}
+        onOpenChange={open => {
+          if (!open) {
+            setEditingShow(null);
+          }
+        }}
+        show={editingShow}
+      />
+
+      <DeleteShowDialog
+        open={Boolean(deletingShow)}
+        onOpenChange={open => {
+          if (!open) {
+            setDeletingShow(null);
+          }
+        }}
+        show={deletingShow}
+      />
     </main>
   );
 }

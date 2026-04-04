@@ -4,6 +4,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "#/components/ui/button";
 import { Card, CardContent } from "#/components/ui/card";
 import {
+  DropdownMenuGroup,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -13,9 +14,11 @@ import type { TvShow } from "#/types/tvShow";
 
 interface ShowCardProps {
   show: TvShow;
+  onEdit: (show: TvShow) => void;
+  onDelete: (show: TvShow) => void;
 }
 
-export function ShowCard({ show }: ShowCardProps) {
+export function ShowCard({ show, onEdit, onDelete }: ShowCardProps) {
   const showId = encodeURIComponent(show.title);
 
   return (
@@ -34,7 +37,7 @@ export function ShowCard({ show }: ShowCardProps) {
             <Button
               variant="secondary"
               size="icon"
-              className="h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
+              className="h-7 w-7 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100"
               onClick={e => e.preventDefault()}
             >
               <HugeiconsIcon icon={MoreHorizontalIcon} size={16} />
@@ -42,10 +45,12 @@ export function ShowCard({ show }: ShowCardProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem disabled>Edit</DropdownMenuItem>
-            <DropdownMenuItem disabled className="text-destructive focus:text-destructive">
-              Delete
-            </DropdownMenuItem>
+            <DropdownMenuGroup>
+              <DropdownMenuItem onSelect={() => onEdit(show)}>Edit</DropdownMenuItem>
+              <DropdownMenuItem variant="destructive" onSelect={() => onDelete(show)}>
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

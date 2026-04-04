@@ -6,6 +6,8 @@ import type { Season } from "#/types/season";
 import type { SearchResponse, TvShow } from "#/types/tvShow";
 
 export const getShowDetailQueryKey = (showTitle: string) => ["show", showTitle] as const;
+export const getSeasonsQueryKey = (showKey?: string) => ["seasons", showKey] as const;
+export const getEpisodesQueryKey = (seasonKeys: string[]) => ["episodes", ...seasonKeys] as const;
 
 async function fetchShow(showTitle: string): Promise<TvShow> {
   const { data } = await api.post<TvShow>("/query/readAsset", {
@@ -62,7 +64,7 @@ export function useShow(showTitle: string) {
 
 export function useSeasons(showKey?: string) {
   return useQuery({
-    queryKey: ["seasons", showKey],
+    queryKey: getSeasonsQueryKey(showKey),
     enabled: Boolean(showKey),
     queryFn: () => fetchSeasons(showKey!),
   });
@@ -70,7 +72,7 @@ export function useSeasons(showKey?: string) {
 
 export function useEpisodes(seasonKeys: string[]) {
   return useQuery({
-    queryKey: ["episodes", ...seasonKeys],
+    queryKey: getEpisodesQueryKey(seasonKeys),
     enabled: seasonKeys.length > 0,
     queryFn: () => fetchEpisodes(seasonKeys),
   });

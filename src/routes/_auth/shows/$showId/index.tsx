@@ -27,6 +27,11 @@ const MOBILE_POSTER_MIN_HEIGHT_REM = 18;
 const MOBILE_POSTER_MAX_HEIGHT_REM = 27;
 const MOBILE_POSTER_SCROLL_RANGE_PX = 220;
 
+type PosterStyleVariables = CSSProperties & {
+  "--mobile-poster-height": string;
+  "--mobile-poster-width": string;
+};
+
 export const Route = createFileRoute("/_auth/shows/$showId/")({
   staticData: { crumb: "Show" },
   validateSearch: search => ({
@@ -315,10 +320,10 @@ function ShowHero({
   const scrollY = useWindowScrollY();
   const mobilePosterHeight = getMobilePosterHeight(scrollY);
   const mobilePosterWidth = (mobilePosterHeight * 2) / 3;
-  const mobilePosterStyle = {
+  const mobilePosterStyle: PosterStyleVariables = {
     "--mobile-poster-height": `${mobilePosterHeight}rem`,
     "--mobile-poster-width": `${mobilePosterWidth}rem`,
-  } satisfies CSSProperties;
+  };
 
   return (
     <section className={`relative overflow-hidden border-b border-border ${sectionTone}`}>

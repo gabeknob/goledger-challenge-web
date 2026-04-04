@@ -1,4 +1,7 @@
+import { Fragment } from "react";
 import { Link, useMatches } from "@tanstack/react-router";
+import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -52,22 +55,25 @@ export function Breadcrumbs() {
         {rest.length > 0 && (
           <Link
             to={rest[rest.length - 1].href as never}
-            className="text-sm text-muted-foreground hover:text-foreground md:hidden"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground md:hidden"
           >
-            ← {rest[rest.length - 1].label}
+            <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
+            <span>{rest[rest.length - 1].label}</span>
           </Link>
         )}
 
         {/* Desktop: full trail */}
         <Breadcrumb className="hidden md:flex">
           <BreadcrumbList>
-            {rest.map((crumb, i) => (
-              <BreadcrumbItem key={i}>
-                <BreadcrumbLink asChild>
-                  <Link to={crumb.href as never}>{crumb.label}</Link>
-                </BreadcrumbLink>
+            {rest.map(crumb => (
+              <Fragment key={crumb.href}>
+                <BreadcrumbItem key={crumb.href}>
+                  <BreadcrumbLink asChild>
+                    <Link to={crumb.href as never}>{crumb.label}</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
                 <BreadcrumbSeparator />
-              </BreadcrumbItem>
+              </Fragment>
             ))}
             <BreadcrumbItem>
               <BreadcrumbPage>{last.label}</BreadcrumbPage>

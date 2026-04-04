@@ -23,7 +23,6 @@ import { useShows } from "#/hooks/useShows";
 import type { TvShow } from "#/types/tvShow";
 
 export const Route = createFileRoute("/_auth/shows/")({
-  staticData: { crumb: "Shows" },
   component: ShowsPage,
 });
 

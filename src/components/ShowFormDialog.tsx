@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -42,24 +41,15 @@ export function ShowFormDialog({
   const {
     register,
     handleSubmit,
-    reset,
     formState: { errors },
   } = useForm<TvShowFormValues>({
     resolver: zodResolver(createTvShowSchema(existingShows, currentTitle)),
-    defaultValues: {
+    values: {
       title: show?.title ?? "",
       description: show?.description ?? "",
       recommendedAge: show?.recommendedAge ?? 16,
     },
   });
-
-  useEffect(() => {
-    reset({
-      title: show?.title ?? "",
-      description: show?.description ?? "",
-      recommendedAge: show?.recommendedAge ?? 16,
-    });
-  }, [open, reset, show]);
 
   async function onSubmit(values: TvShowFormValues) {
     try {
@@ -79,11 +69,6 @@ export function ShowFormDialog({
       }
 
       onOpenChange(false);
-      reset({
-        title: values.title,
-        description: values.description,
-        recommendedAge: values.recommendedAge,
-      });
     } catch (error) {
       toast.error(
         getApiErrorMessage(

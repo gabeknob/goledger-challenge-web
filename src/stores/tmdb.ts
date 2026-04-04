@@ -36,7 +36,7 @@ export const useTMDBStore = create<TMDBStoreState>()(
       },
     }),
     {
-      name: "tmdb-image-cache",
+      name: "tmdb-image-cache-v2",
       storage: createJSONStorage(() => localStorage),
     },
   ),

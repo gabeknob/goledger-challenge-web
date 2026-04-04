@@ -26,7 +26,12 @@ export function ShowCard({ show, onEdit, onDelete }: ShowCardProps) {
 
   return (
     <Card className="group relative flex flex-col pt-0 overflow-hidden transition-shadow hover:shadow-md">
-      <Link to="/shows/$showId" params={{ showId }} className="flex flex-col flex-1">
+      <Link
+        to="/shows/$showId"
+        params={{ showId }}
+        search={{ season: undefined }}
+        className="flex flex-col flex-1"
+      >
         <div className={`relative aspect-[2/3] w-full overflow-hidden ${fallbackTone}`}>
           {imageUrl ? (
             <img

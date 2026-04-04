@@ -1,4 +1,4 @@
-import * as React from "react";
+import type { ComponentProps } from "react";
 
 import {
   Dialog,
@@ -10,90 +10,54 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "#/components/ui/dialog";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "#/components/ui/sheet";
+import { cn } from "#/lib/utils";
 
-function useIsDesktop() {
-  const [isDesktop, setIsDesktop] = React.useState(false);
-
-  React.useEffect(() => {
-    const mediaQuery = window.matchMedia("(min-width: 768px)");
-    const updateMatches = () => setIsDesktop(mediaQuery.matches);
-
-    updateMatches();
-    mediaQuery.addEventListener("change", updateMatches);
-
-    return () => mediaQuery.removeEventListener("change", updateMatches);
-  }, []);
-
-  return isDesktop;
+function Credenza(props: ComponentProps<typeof Dialog>) {
+  return <Dialog {...props} />;
 }
 
-function Credenza({ children, ...props }: React.ComponentProps<typeof Dialog>) {
-  const isDesktop = useIsDesktop();
-  const Root = isDesktop ? Dialog : Sheet;
-
-  return <Root {...props}>{children}</Root>;
+function CredenzaTrigger(props: ComponentProps<typeof DialogTrigger>) {
+  return <DialogTrigger {...props} />;
 }
 
-function CredenzaTrigger({ children, ...props }: React.ComponentProps<typeof DialogTrigger>) {
-  const isDesktop = useIsDesktop();
-  const Trigger = isDesktop ? DialogTrigger : SheetTrigger;
-
-  return <Trigger {...props}>{children}</Trigger>;
+function CredenzaClose(props: ComponentProps<typeof DialogClose>) {
+  return <DialogClose {...props} />;
 }
 
-function CredenzaClose({ children, ...props }: React.ComponentProps<typeof DialogClose>) {
-  const isDesktop = useIsDesktop();
-  const Close = isDesktop ? DialogClose : SheetClose;
-
-  return <Close {...props}>{children}</Close>;
+function CredenzaContent({ className, ...props }: ComponentProps<typeof DialogContent>) {
+  return (
+    <DialogContent
+      className={cn(
+        "top-auto bottom-0 left-0 w-full max-w-none translate-x-0 translate-y-0 rounded-t-[2rem] rounded-b-none border-x-0 border-b-0 px-5 py-6 md:top-1/2 md:bottom-auto md:left-1/2 md:w-[min(100%-2rem,36rem)] md:max-w-[36rem] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-[2rem] md:border md:px-6 md:pt-6 md:pb-8",
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
-function CredenzaContent({ children, ...props }: React.ComponentProps<typeof DialogContent>) {
-  const isDesktop = useIsDesktop();
-  const Content = isDesktop ? DialogContent : SheetContent;
-
-  return <Content {...props}>{children}</Content>;
+function CredenzaHeader(props: ComponentProps<"div">) {
+  return <DialogHeader {...props} />;
 }
 
-function CredenzaHeader({ children, ...props }: React.ComponentProps<"div">) {
-  const isDesktop = useIsDesktop();
-  const Header = isDesktop ? DialogHeader : SheetHeader;
-
-  return <Header {...props}>{children}</Header>;
+function CredenzaFooter({ className, ...props }: ComponentProps<"div">) {
+  return (
+    <DialogFooter
+      className={cn(
+        "flex-col gap-2 sm:flex-col sm:justify-start md:flex-row md:justify-end",
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
-function CredenzaFooter({ children, ...props }: React.ComponentProps<"div">) {
-  const isDesktop = useIsDesktop();
-  const Footer = isDesktop ? DialogFooter : SheetFooter;
-
-  return <Footer {...props}>{children}</Footer>;
+function CredenzaTitle(props: ComponentProps<typeof DialogTitle>) {
+  return <DialogTitle {...props} />;
 }
 
-function CredenzaTitle({ children, ...props }: React.ComponentProps<typeof DialogTitle>) {
-  const isDesktop = useIsDesktop();
-  const Title = isDesktop ? DialogTitle : SheetTitle;
-
-  return <Title {...props}>{children}</Title>;
-}
-
-function CredenzaDescription({
-  children,
-  ...props
-}: React.ComponentProps<typeof DialogDescription>) {
-  const isDesktop = useIsDesktop();
-  const Description = isDesktop ? DialogDescription : SheetDescription;
-
-  return <Description {...props}>{children}</Description>;
+function CredenzaDescription(props: ComponentProps<typeof DialogDescription>) {
+  return <DialogDescription {...props} />;
 }
 
 export {

@@ -39,7 +39,6 @@ type PosterStyleVariables = CSSProperties & {
 };
 
 export const Route = createFileRoute("/_auth/shows/$showId/")({
-  staticData: { crumb: "Show" },
   validateSearch: search => ({
     season:
       typeof search.season === "number"
@@ -47,9 +46,6 @@ export const Route = createFileRoute("/_auth/shows/$showId/")({
         : typeof search.season === "string" && search.season.trim()
           ? Number(search.season)
           : undefined,
-  }),
-  loader: ({ params }) => ({
-    crumb: decodeURIComponent(params.showId),
   }),
   component: ShowDetailPage,
 });

@@ -17,6 +17,7 @@ import { Route as AuthShowsRouteImport } from './routes/_auth/shows'
 import { Route as AuthWatchlistsIndexRouteImport } from './routes/_auth/watchlists/index'
 import { Route as AuthShowsIndexRouteImport } from './routes/_auth/shows/index'
 import { Route as AuthWatchlistsTitleRouteImport } from './routes/_auth/watchlists/$title'
+import { Route as AuthShowsShowIdRouteImport } from './routes/_auth/shows/$showId'
 import { Route as AuthShowsShowIdIndexRouteImport } from './routes/_auth/shows/$showId/index'
 import { Route as AuthShowsShowIdEpisodesEpisodeRouteImport } from './routes/_auth/shows/$showId/episodes/$episode'
 
@@ -59,16 +60,21 @@ const AuthWatchlistsTitleRoute = AuthWatchlistsTitleRouteImport.update({
   path: '/$title',
   getParentRoute: () => AuthWatchlistsRoute,
 } as any)
-const AuthShowsShowIdIndexRoute = AuthShowsShowIdIndexRouteImport.update({
-  id: '/$showId/',
-  path: '/$showId/',
+const AuthShowsShowIdRoute = AuthShowsShowIdRouteImport.update({
+  id: '/$showId',
+  path: '/$showId',
   getParentRoute: () => AuthShowsRoute,
+} as any)
+const AuthShowsShowIdIndexRoute = AuthShowsShowIdIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthShowsShowIdRoute,
 } as any)
 const AuthShowsShowIdEpisodesEpisodeRoute =
   AuthShowsShowIdEpisodesEpisodeRouteImport.update({
-    id: '/$showId/episodes/$episode',
-    path: '/$showId/episodes/$episode',
-    getParentRoute: () => AuthShowsRoute,
+    id: '/episodes/$episode',
+    path: '/episodes/$episode',
+    getParentRoute: () => AuthShowsShowIdRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -76,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/shows': typeof AuthShowsRouteWithChildren
   '/watchlists': typeof AuthWatchlistsRouteWithChildren
+  '/shows/$showId': typeof AuthShowsShowIdRouteWithChildren
   '/watchlists/$title': typeof AuthWatchlistsTitleRoute
   '/shows/': typeof AuthShowsIndexRoute
   '/watchlists/': typeof AuthWatchlistsIndexRoute
@@ -98,6 +105,7 @@ export interface FileRoutesById {
   '/_auth/shows': typeof AuthShowsRouteWithChildren
   '/_auth/watchlists': typeof AuthWatchlistsRouteWithChildren
   '/_auth/': typeof AuthIndexRoute
+  '/_auth/shows/$showId': typeof AuthShowsShowIdRouteWithChildren
   '/_auth/watchlists/$title': typeof AuthWatchlistsTitleRoute
   '/_auth/shows/': typeof AuthShowsIndexRoute
   '/_auth/watchlists/': typeof AuthWatchlistsIndexRoute
@@ -111,6 +119,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/shows'
     | '/watchlists'
+    | '/shows/$showId'
     | '/watchlists/$title'
     | '/shows/'
     | '/watchlists/'
@@ -132,6 +141,7 @@ export interface FileRouteTypes {
     | '/_auth/shows'
     | '/_auth/watchlists'
     | '/_auth/'
+    | '/_auth/shows/$showId'
     | '/_auth/watchlists/$title'
     | '/_auth/shows/'
     | '/_auth/watchlists/'
@@ -202,33 +212,52 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthWatchlistsTitleRouteImport
       parentRoute: typeof AuthWatchlistsRoute
     }
+    '/_auth/shows/$showId': {
+      id: '/_auth/shows/$showId'
+      path: '/$showId'
+      fullPath: '/shows/$showId'
+      preLoaderRoute: typeof AuthShowsShowIdRouteImport
+      parentRoute: typeof AuthShowsRoute
+    }
     '/_auth/shows/$showId/': {
       id: '/_auth/shows/$showId/'
-      path: '/$showId'
+      path: '/'
       fullPath: '/shows/$showId/'
       preLoaderRoute: typeof AuthShowsShowIdIndexRouteImport
-      parentRoute: typeof AuthShowsRoute
+      parentRoute: typeof AuthShowsShowIdRoute
     }
     '/_auth/shows/$showId/episodes/$episode': {
       id: '/_auth/shows/$showId/episodes/$episode'
-      path: '/$showId/episodes/$episode'
+      path: '/episodes/$episode'
       fullPath: '/shows/$showId/episodes/$episode'
       preLoaderRoute: typeof AuthShowsShowIdEpisodesEpisodeRouteImport
-      parentRoute: typeof AuthShowsRoute
+      parentRoute: typeof AuthShowsShowIdRoute
     }
   }
 }
 
-interface AuthShowsRouteChildren {
-  AuthShowsIndexRoute: typeof AuthShowsIndexRoute
+interface AuthShowsShowIdRouteChildren {
   AuthShowsShowIdIndexRoute: typeof AuthShowsShowIdIndexRoute
   AuthShowsShowIdEpisodesEpisodeRoute: typeof AuthShowsShowIdEpisodesEpisodeRoute
 }
 
-const AuthShowsRouteChildren: AuthShowsRouteChildren = {
-  AuthShowsIndexRoute: AuthShowsIndexRoute,
+const AuthShowsShowIdRouteChildren: AuthShowsShowIdRouteChildren = {
   AuthShowsShowIdIndexRoute: AuthShowsShowIdIndexRoute,
   AuthShowsShowIdEpisodesEpisodeRoute: AuthShowsShowIdEpisodesEpisodeRoute,
+}
+
+const AuthShowsShowIdRouteWithChildren = AuthShowsShowIdRoute._addFileChildren(
+  AuthShowsShowIdRouteChildren,
+)
+
+interface AuthShowsRouteChildren {
+  AuthShowsShowIdRoute: typeof AuthShowsShowIdRouteWithChildren
+  AuthShowsIndexRoute: typeof AuthShowsIndexRoute
+}
+
+const AuthShowsRouteChildren: AuthShowsRouteChildren = {
+  AuthShowsShowIdRoute: AuthShowsShowIdRouteWithChildren,
+  AuthShowsIndexRoute: AuthShowsIndexRoute,
 }
 
 const AuthShowsRouteWithChildren = AuthShowsRoute._addFileChildren(

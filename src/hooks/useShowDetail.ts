@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { api } from "#/lib/api";
-import type { Episode } from "#/types/episode";
+import type { Episode, EpisodeHistoryEntry } from "#/types/episode";
 import type { Season } from "#/types/season";
 import type { SearchResponse, TvShow } from "#/types/tvShow";
 
@@ -9,6 +9,13 @@ export const getShowDetailQueryKey = (showTitle: string) => ["show", showTitle] 
 export const getSeasonsQueryKey = (showKey?: string) => ["seasons", showKey] as const;
 export const getEpisodesRootQueryKey = () => ["episodes"] as const;
 export const getEpisodesQueryKey = (seasonKeys: string[]) => ["episodes", ...seasonKeys] as const;
+export const getEpisodeQueryKey = (
+  showKey?: string,
+  seasonNumber?: number,
+  episodeNumber?: number,
+) => ["episode", showKey, seasonNumber, episodeNumber] as const;
+export const getEpisodeHistoryQueryKey = (episodeKey?: string) =>
+  ["episodeHistory", episodeKey] as const;
 
 async function fetchShow(showTitle: string): Promise<TvShow> {
   const { data } = await api.post<TvShow>("/query/readAsset", {
@@ -55,6 +62,42 @@ async function fetchEpisodes(seasonKeys: string[]): Promise<Episode[]> {
     .sort((left, right) => left.episodeNumber - right.episodeNumber);
 }
 
+async function fetchEpisode(
+  showKey: string,
+  seasonNumber: number,
+  episodeNumber: number,
+): Promise<Episode> {
+  const seasons = await fetchSeasons(showKey);
+  const season = seasons.find(entry => entry.number === seasonNumber);
+
+  if (!season) {
+    throw new Error(`Season ${seasonNumber} was not found for this show.`);
+  }
+
+  const episodes = await fetchEpisodes([season["@key"]]);
+  const episode = episodes.find(entry => entry.episodeNumber === episodeNumber);
+
+  if (!episode) {
+    throw new Error(`Episode ${episodeNumber} was not found in Season ${seasonNumber}.`);
+  }
+
+  return episode;
+}
+
+async function fetchEpisodeHistory(episode: Episode): Promise<EpisodeHistoryEntry[]> {
+  const { data } = await api.post<EpisodeHistoryEntry[]>("/query/readAssetHistory", {
+    key: {
+      "@assetType": "episodes",
+      season: episode.season,
+      episodeNumber: episode.episodeNumber,
+    },
+  });
+
+  return [...data].sort((left, right) => {
+    return new Date(right._timestamp).getTime() - new Date(left._timestamp).getTime();
+  });
+}
+
 export function useShow(showTitle: string) {
   return useQuery({
     queryKey: getShowDetailQueryKey(showTitle),
@@ -76,5 +119,26 @@ export function useEpisodes(seasonKeys: string[]) {
     queryKey: getEpisodesQueryKey(seasonKeys),
     enabled: seasonKeys.length > 0,
     queryFn: () => fetchEpisodes(seasonKeys),
+  });
+}
+
+export function useEpisode(showKey?: string, seasonNumber?: number, episodeNumber?: number) {
+  return useQuery({
+    queryKey: getEpisodeQueryKey(showKey, seasonNumber, episodeNumber),
+    enabled:
+      Boolean(showKey) &&
+      seasonNumber !== undefined &&
+      !Number.isNaN(seasonNumber) &&
+      episodeNumber !== undefined &&
+      !Number.isNaN(episodeNumber),
+    queryFn: () => fetchEpisode(showKey!, seasonNumber!, episodeNumber!),
+  });
+}
+
+export function useEpisodeHistory(episode?: Episode | null) {
+  return useQuery({
+    queryKey: getEpisodeHistoryQueryKey(episode?.["@key"]),
+    enabled: Boolean(episode),
+    queryFn: () => fetchEpisodeHistory(episode!),
   });
 }

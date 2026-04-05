@@ -7,10 +7,11 @@ import {
 } from "#/hooks/useShowDetail";
 import { api } from "#/lib/api";
 import { queryClient } from "#/lib/queryClient";
+import { searchAllAssets, searchAssetPage } from "#/lib/search";
 import { getWatchlistQueryKey, watchlistsQueryKey } from "#/hooks/useWatchlists";
 import type { Episode } from "#/types/episode";
 import type { Season, TvShowReference } from "#/types/season";
-import type { SearchResponse, TvShow } from "#/types/tvShow";
+import type { TvShow } from "#/types/tvShow";
 import type { Watchlist } from "#/types/watchlist";
 
 const SHOWS_BROWSE_PAGE_SIZE = 12;
@@ -31,11 +32,6 @@ interface UpdateShowPayload {
   next: TvShowPayload;
   onPlanChange?: (plan: ShowRenamePlan) => void;
   onTaskStatusChange?: (taskId: string, status: ShowCascadeTaskStatus) => void;
-}
-
-interface SearchAssetPage<T> {
-  items: T[];
-  nextBookmark?: string;
 }
 
 interface CascadeDeleteResult {
@@ -77,62 +73,6 @@ export const showsBrowseQueryKey = ["shows", "browse"] as const;
 
 function escapeRegex(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-async function searchAssetPage<T>({
-  assetType,
-  bookmark,
-  limit,
-  selector = {},
-}: {
-  assetType: string;
-  bookmark?: string;
-  limit: number;
-  selector?: Record<string, unknown>;
-}): Promise<SearchAssetPage<T>> {
-  const { data } = await api.post<SearchResponse<T>>("/query/search", {
-    query: {
-      selector: {
-        "@assetType": assetType,
-        ...selector,
-      },
-      limit,
-      ...(bookmark ? { bookmark } : {}),
-    },
-  });
-
-  return {
-    items: data.result,
-    nextBookmark:
-      data.result.length < limit || !data.metadata.bookmark ? undefined : data.metadata.bookmark,
-  };
-}
-
-async function searchAllAssets<T>({
-  assetType,
-  limit = 200,
-  selector = {},
-}: {
-  assetType: string;
-  limit?: number;
-  selector?: Record<string, unknown>;
-}): Promise<T[]> {
-  const items: T[] = [];
-  let bookmark: string | undefined;
-
-  do {
-    const page = await searchAssetPage<T>({
-      assetType,
-      bookmark,
-      limit,
-      selector,
-    });
-
-    items.push(...page.items);
-    bookmark = page.nextBookmark;
-  } while (bookmark);
-
-  return items;
 }
 
 async function fetchShows(): Promise<TvShow[]> {

@@ -20,6 +20,7 @@
 
 ## Architecture decisions
 
+- [ ] Paleta de cores — expandir os três valores de marca do `getHeader` (primário, secundário, fundo) em escalas completas via Radix UI Color Generator, então mapear semanticamente para as CSS vars do shadcn/ui em `src/styles.css` com base em luminância e papel funcional de cada passo da escala
 - [ ] Why Vite + TanStack Router over Next.js
 - [ ] Authentication strategy: Basic Auth via a client-managed `js-cookie` credential cookie, credential gate layout (plain `lib/auth.ts` for outside-React contexts like `beforeLoad` guards + Axios interceptor; `useAuth` hook for React-aware actions like logout with cache invalidation)
 - [ ] No code generation (Orval) — manual types from getSchema

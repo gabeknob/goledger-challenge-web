@@ -1,25 +1,33 @@
-interface DeletionTaskListItem {
+interface TaskListItem {
   id: string;
   label: string;
 }
 
-export type DeletionTaskStatus = "pending" | "running" | "completed" | "failed";
+export type TaskStatus = "pending" | "running" | "completed" | "failed";
 
-interface DeletionTaskListProps {
-  tasks: DeletionTaskListItem[];
-  statuses: Record<string, DeletionTaskStatus>;
+interface TaskListProps {
+  tasks: TaskListItem[];
+  statuses: Record<string, TaskStatus>;
   className?: string;
   showStatusLabel?: boolean;
+  completedLabel?: string;
+  failedLabel?: string;
+  pendingLabel?: string;
+  runningLabel?: string;
 }
 
-export function DeletionTaskList({
+export function TaskList({
   tasks,
   statuses,
   className,
   showStatusLabel = false,
-}: DeletionTaskListProps) {
+  completedLabel = "Done",
+  failedLabel = "Failed",
+  pendingLabel = "Queued",
+  runningLabel = "Deleting",
+}: TaskListProps) {
   return (
-    <div className={className}>
+    <div className={`mt-4 ${className ?? ""}`.trim()}>
       {tasks.map(task => {
         const status = statuses[task.id] ?? "pending";
 
@@ -61,12 +69,12 @@ export function DeletionTaskList({
                 }`}
               >
                 {status === "completed"
-                  ? "Done"
+                  ? completedLabel
                   : status === "failed"
-                    ? "Failed"
+                    ? failedLabel
                     : status === "running"
-                      ? "Deleting"
-                      : "Queued"}
+                      ? runningLabel
+                      : pendingLabel}
               </p>
             ) : null}
           </div>

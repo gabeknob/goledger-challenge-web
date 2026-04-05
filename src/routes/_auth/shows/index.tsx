@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Cancel01Icon, Search01Icon, Tv01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { DeleteShowDialog } from "#/components/DeleteShowDialog";
@@ -17,6 +17,7 @@ export const Route = createFileRoute("/_auth/shows/")({
 });
 
 export function ShowsPage() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingShow, setEditingShow] = useState<TvShow | null>(null);
@@ -167,6 +168,14 @@ export function ShowsPage() {
           if (!open) {
             setEditingShow(null);
           }
+        }}
+        onSubmitted={title => {
+          setEditingShow(null);
+          void navigate({
+            to: "/shows/$showId",
+            params: { showId: title },
+            search: { season: undefined },
+          });
         }}
         show={editingShow}
       />

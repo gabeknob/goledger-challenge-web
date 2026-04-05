@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { Cancel01Icon, Search01Icon, Tv01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
@@ -13,6 +14,7 @@ import { useShowsBrowse } from "#/hooks/useShows";
 import type { TvShow } from "#/types/tvShow";
 
 export function ShowsPage() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingShow, setEditingShow] = useState<TvShow | null>(null);
@@ -163,6 +165,14 @@ export function ShowsPage() {
           if (!open) {
             setEditingShow(null);
           }
+        }}
+        onSubmitted={title => {
+          setEditingShow(null);
+          void navigate({
+            to: "/shows/$showId",
+            params: { showId: title },
+            search: { season: undefined },
+          });
         }}
         show={editingShow}
       />

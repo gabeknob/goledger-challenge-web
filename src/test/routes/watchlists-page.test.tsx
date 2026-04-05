@@ -6,12 +6,22 @@ import { WatchlistsPage } from "#/pages/_auth/watchlists/WatchlistsPage";
 import { makeTvShow, makeWatchlist } from "#/test/factories";
 import { renderRoute } from "#/test/test-utils";
 
+const navigateMock = vi.fn();
 const useCreateWatchlistMock = vi.fn();
 const useDeleteWatchlistMock = vi.fn();
 const useShowsMock = vi.fn();
 const useTMDBMock = vi.fn();
 const useUpdateWatchlistMock = vi.fn();
 const useWatchlistsMock = vi.fn();
+
+vi.mock("@tanstack/react-router", async (importOriginal: <T>() => Promise<T>) => {
+  const actual = await importOriginal<typeof import("@tanstack/react-router")>();
+
+  return {
+    ...actual,
+    useNavigate: () => navigateMock,
+  };
+});
 
 vi.mock("#/lib/auth", async (importOriginal: <T>() => Promise<T>) => {
   const actual = await importOriginal<typeof import("#/lib/auth")>();
@@ -105,6 +115,7 @@ vi.mock("#/components/ui/sheet", () => ({
 
 describe("/watchlists page", () => {
   beforeEach(() => {
+    navigateMock.mockReset();
     useCreateWatchlistMock.mockReturnValue({ isPending: false, mutateAsync: vi.fn() });
     useDeleteWatchlistMock.mockReturnValue({ isPending: false, mutateAsync: vi.fn() });
     useShowsMock.mockReturnValue({ data: [] });
@@ -188,6 +199,11 @@ describe("/watchlists page", () => {
 
   it("renders populated watchlists, supports sorting, and opens and closes dialogs", async () => {
     const user = userEvent.setup();
+    const updateWatchlistMutateAsyncMock = vi.fn().mockResolvedValue(undefined);
+    useUpdateWatchlistMock.mockReturnValue({
+      isPending: false,
+      mutateAsync: updateWatchlistMutateAsyncMock,
+    });
 
     useShowsMock.mockReturnValue({
       data: [
@@ -236,16 +252,26 @@ describe("/watchlists page", () => {
 
     await user.click(screen.getAllByRole("button", { name: "Edit" })[0]!);
     expect(screen.getByRole("heading", { name: "Edit Watchlist" })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Cancel" }));
-    expect(screen.queryByRole("heading", { name: "Edit Watchlist" })).not.toBeInTheDocument();
+    await user.clear(screen.getByLabelText("Title"));
+    await user.type(screen.getByLabelText("Title"), "Alpha Reloaded");
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+    expect(updateWatchlistMutateAsyncMock).toHaveBeenCalledWith({
+      current: expect.objectContaining({ title: "Alpha" }),
+      next: {
+        description: expect.any(String),
+        title: "Alpha Reloaded",
+      },
+    });
+    expect(navigateMock).toHaveBeenCalledWith({
+      params: { title: "Alpha Reloaded" },
+      to: "/watchlists/$title",
+    });
 
     await user.click(screen.getByRole("button", { name: "Sort Z-A" }));
     const titles = screen
       .getAllByRole("heading", { level: 2 })
       .map(node => node.textContent)
-      .filter(
-        (text): text is string => text === "Alpha" || text === "Zeta" || text === "Gamma",
-      );
+      .filter((text): text is string => text === "Alpha" || text === "Zeta" || text === "Gamma");
     expect(titles.slice(0, 3)).toEqual(["Zeta", "Gamma", "Alpha"]);
 
     await user.click(screen.getAllByRole("button", { name: "Delete" })[0]!);
@@ -256,9 +282,7 @@ describe("/watchlists page", () => {
     const ascendingTitles = screen
       .getAllByRole("heading", { level: 2 })
       .map(node => node.textContent)
-      .filter(
-        (text): text is string => text === "Alpha" || text === "Zeta" || text === "Gamma",
-      );
+      .filter((text): text is string => text === "Alpha" || text === "Zeta" || text === "Gamma");
     expect(ascendingTitles.slice(0, 3)).toEqual(["Alpha", "Gamma", "Zeta"]);
 
     await user.click(screen.getAllByRole("button", { name: "Delete" })[0]!);

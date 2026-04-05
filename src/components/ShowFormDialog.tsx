@@ -14,7 +14,7 @@ import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import { Textarea } from "#/components/ui/textarea";
-import { useCreateShow, useUpdateShow } from "#/hooks/useShows";
+import { type ShowCascadeTaskStatus, type ShowRenamePlan, useCreateShow, useUpdateShow } from "#/hooks/useShows";
 import { getApiErrorMessage } from "#/lib/api-errors";
 import { createTvShowSchema, type TvShowFormValues } from "#/schemas/tvShow";
 import type { TvShow } from "#/types/tvShow";
@@ -22,16 +22,24 @@ import type { TvShow } from "#/types/tvShow";
 interface ShowFormDialogProps {
   existingShows: TvShow[];
   mode: "create" | "edit";
+  onRenamePlanChange?: (plan: ShowRenamePlan | null) => void;
+  onRenameTaskStatusChange?: (taskId: string, status: ShowCascadeTaskStatus) => void;
+  onRenamingChange?: (renaming: boolean) => void;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSubmitted?: (title: string) => void;
   show?: TvShow | null;
 }
 
 export function ShowFormDialog({
   existingShows,
   mode,
+  onRenamePlanChange,
+  onRenameTaskStatusChange,
+  onRenamingChange,
   open,
   onOpenChange,
+  onSubmitted,
   show,
 }: ShowFormDialogProps) {
   const createShow = useCreateShow();
@@ -57,6 +65,11 @@ export function ShowFormDialog({
         await createShow.mutateAsync(values);
         toast.success(`"${values.title}" was created successfully.`);
       } else if (show) {
+        const titleChanged = values.title !== show.title;
+        if (titleChanged) {
+          onRenamingChange?.(true);
+        }
+
         await updateShow.mutateAsync({
           current: show,
           next: {
@@ -64,12 +77,21 @@ export function ShowFormDialog({
             description: values.description,
             recommendedAge: values.recommendedAge,
           },
+          onPlanChange: plan => onRenamePlanChange?.(plan),
+          onTaskStatusChange: onRenameTaskStatusChange,
         });
-        toast.success(`"${values.title}" was updated successfully.`);
+        toast.success(
+          titleChanged
+            ? `"${values.title}" was renamed successfully.`
+            : `"${values.title}" was updated successfully.`,
+        );
       }
 
       onOpenChange(false);
+      onSubmitted?.(values.title);
     } catch (error) {
+      onRenamingChange?.(false);
+      onRenamePlanChange?.(null);
       toast.error(
         getApiErrorMessage(
           error,
@@ -102,8 +124,6 @@ export function ShowFormDialog({
               id="show-title"
               aria-invalid={Boolean(errors.title)}
               placeholder="Breaking Bad"
-              readOnly={mode === "edit"}
-              className={mode === "edit" ? "bg-muted/60 text-muted-foreground" : undefined}
               {...register("title")}
             />
             {errors.title ? (
@@ -111,7 +131,7 @@ export function ShowFormDialog({
             ) : null}
             {mode === "edit" ? (
               <p className="text-sm text-muted-foreground">
-                Title changes are locked because other records may reference this show by title.
+                Title changes will cascade through related seasons, episodes, and watchlists.
               </p>
             ) : null}
           </div>

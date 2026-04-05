@@ -461,4 +461,51 @@ describe("show detail route", () => {
       ),
     ).toHaveTextContent("This can take a moment.");
   }, 30000);
+
+  it("shows rename progress when the show title changes", async () => {
+    const user = userEvent.setup();
+
+    useUpdateShowMock.mockReturnValue({
+      isPending: false,
+      mutateAsync: vi.fn(async ({ onPlanChange, onTaskStatusChange }) => {
+        queueMicrotask(() => {
+          onPlanChange?.({
+            recreatedEpisodes: 2,
+            recreatedSeasons: 2,
+            updatedWatchlists: 0,
+            tasks: [
+              {
+                id: "show:create:tvShows:ted-lasso",
+                kind: "show",
+                label: "Create renamed show",
+              },
+              {
+                id: "season:create:seasons:ted-lasso:1",
+                kind: "season",
+                label: "Recreate Season 1",
+              },
+            ],
+          });
+          onTaskStatusChange?.("show:create:tvShows:ted-lasso", "completed");
+          onTaskStatusChange?.("season:create:seasons:ted-lasso:1", "running");
+        });
+
+        return await new Promise<never>(() => {});
+      }),
+    });
+
+    await renderAppRoute("/shows/Ted%20Lasso?season=1");
+
+    await user.click(screen.getByRole("button", { name: "Edit Show" }));
+    await user.clear(screen.getByLabelText("Title"));
+    await user.type(screen.getByLabelText("Title"), "Ted Lasso Reloaded");
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Renaming Show")).toBeInTheDocument();
+    });
+    expect(screen.getByText("Updating Ted Lasso")).toBeInTheDocument();
+    expect(screen.getByText("Create renamed show")).toBeInTheDocument();
+    expect(screen.getByText("Recreate Season 1")).toBeInTheDocument();
+  }, 30000);
 });

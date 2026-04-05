@@ -102,7 +102,12 @@ export function WatchlistCard({
 function WatchlistArtwork({ itemTitles, title }: { itemTitles: string[]; title: string }) {
   const posterTitles = itemTitles.slice(0, 4);
   const hasMosaic = posterTitles.length >= 4;
-  const backgroundTitles = hasMosaic ? posterTitles : posterTitles.slice(0, 1);
+  const hasSplitArtwork = posterTitles.length >= 2 && posterTitles.length < 4;
+  const backgroundTitles = hasMosaic
+    ? posterTitles
+    : hasSplitArtwork
+      ? posterTitles.slice(0, 2)
+      : posterTitles.slice(0, 1);
   const fallbackTone = getPosterFallbackTone(title);
   const hasArtwork = backgroundTitles.length > 0;
 
@@ -110,11 +115,15 @@ function WatchlistArtwork({ itemTitles, title }: { itemTitles: string[]; title: 
     <div className={`relative h-28 overflow-hidden ${hasArtwork ? "bg-background" : fallbackTone}`}>
       <div className="absolute inset-0 scale-110 blur-sm saturate-150">
         {hasArtwork ? (
-          <WatchlistPosterGrid
-            posterTitles={backgroundTitles}
-            overflowCount={0}
-            tiled={hasMosaic}
-          />
+          hasSplitArtwork ? (
+            <WatchlistPosterSplit posterTitles={backgroundTitles} />
+          ) : (
+            <WatchlistPosterGrid
+              posterTitles={backgroundTitles}
+              overflowCount={0}
+              tiled={hasMosaic}
+            />
+          )
         ) : null}
       </div>
       <div className="absolute inset-0 bg-foreground/25" />
@@ -126,11 +135,16 @@ function WatchlistArtwork({ itemTitles, title }: { itemTitles: string[]; title: 
 function WatchlistCover({ itemTitles, title }: { itemTitles: string[]; title: string }) {
   const posterTitles = itemTitles.slice(0, 4);
   const hasMosaic = posterTitles.length >= 4;
+  const hasSplitCover = posterTitles.length >= 2 && posterTitles.length < 4;
   const coverTitles = hasMosaic ? posterTitles : posterTitles.slice(0, 1);
-  const overflowCount = Math.max(itemTitles.length - 2, 0);
+  const overflowCount = Math.max(itemTitles.length - 3, 0);
 
   if (coverTitles.length === 0) {
     return <WatchlistEmptyCover title={title} />;
+  }
+
+  if (hasSplitCover) {
+    return <WatchlistPosterSplit posterTitles={posterTitles.slice(0, 2)} />;
   }
 
   return (
@@ -139,6 +153,16 @@ function WatchlistCover({ itemTitles, title }: { itemTitles: string[]; title: st
       overflowCount={overflowCount}
       tiled={hasMosaic}
     />
+  );
+}
+
+function WatchlistPosterSplit({ posterTitles }: { posterTitles: string[] }) {
+  return (
+    <div className="grid size-full grid-cols-2 gap-px bg-background/35">
+      {posterTitles.map((posterTitle, index) => (
+        <PosterTile key={`${posterTitle}-${index}`} title={posterTitle} />
+      ))}
+    </div>
   );
 }
 
@@ -175,7 +199,7 @@ function WatchlistPosterGrid({
         <PosterTile
           key={`${posterTitle}-${index}`}
           title={posterTitle}
-          overlayLabel={index === 3 && overflowCount > 1 ? `+${overflowCount}` : undefined}
+          overlayLabel={index === 3 && overflowCount > 0 ? `+${overflowCount}` : undefined}
         />
       ))}
     </div>

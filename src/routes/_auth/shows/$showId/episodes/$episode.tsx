@@ -589,13 +589,11 @@ function getEpisodeTone(seed: string) {
 }
 
 function getHistorySnapshot(entry: EpisodeHistoryEntry) {
-  const snapshot = { ...entry };
-
-  delete snapshot._isDelete;
-  delete snapshot._timestamp;
-  delete snapshot._txId;
-
-  return snapshot;
+  return Object.fromEntries(
+    Object.entries(entry).filter(([key]) => {
+      return key !== "_isDelete" && key !== "_timestamp" && key !== "_txId";
+    }),
+  );
 }
 
 function getFlattenedEpisodeNumber({

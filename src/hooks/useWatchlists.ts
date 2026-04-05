@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { api } from "#/lib/api";
 import { queryClient } from "#/lib/queryClient";
+import type { TvShowReference } from "#/types/season";
 import type { SearchResponse } from "#/types/tvShow";
 import type { Watchlist } from "#/types/watchlist";
 
@@ -16,10 +17,12 @@ interface UpdateWatchlistPayload {
   next: {
     description: string;
     title: string;
+    tvShows?: TvShowReference[];
   };
 }
 
 export const watchlistsQueryKey = ["watchlists"] as const;
+export const getWatchlistQueryKey = (title: string) => ["watchlists", title] as const;
 
 async function fetchWatchlists(): Promise<Watchlist[]> {
   const { data } = await api.post<SearchResponse<Watchlist>>("/query/search", {
@@ -31,6 +34,17 @@ async function fetchWatchlists(): Promise<Watchlist[]> {
   });
 
   return data.result.sort((left, right) => left.title.localeCompare(right.title));
+}
+
+async function fetchWatchlist(title: string): Promise<Watchlist> {
+  const { data } = await api.post<Watchlist>("/query/readAsset", {
+    key: {
+      "@assetType": "watchlist",
+      title,
+    },
+  });
+
+  return data;
 }
 
 function buildWatchlistAsset(payload: WatchlistPayload) {
@@ -55,7 +69,7 @@ async function updateWatchlist({ current, next }: UpdateWatchlistPayload) {
     await createWatchlist({
       description: next.description,
       title: next.title,
-      tvShows: current.tvShows,
+      tvShows: next.tvShows ?? current.tvShows,
     });
 
     await api.delete("/invoke/deleteAsset", {
@@ -74,7 +88,7 @@ async function updateWatchlist({ current, next }: UpdateWatchlistPayload) {
     update: buildWatchlistAsset({
       description: next.description,
       title: current.title,
-      tvShows: current.tvShows,
+      tvShows: next.tvShows ?? current.tvShows,
     }),
   });
 }
@@ -97,6 +111,14 @@ export function useWatchlists() {
   });
 }
 
+export function useWatchlist(title: string) {
+  return useQuery({
+    queryKey: getWatchlistQueryKey(title),
+    enabled: Boolean(title),
+    queryFn: () => fetchWatchlist(title),
+  });
+}
+
 export function useCreateWatchlist() {
   return useMutation({
     mutationFn: createWatchlist,
@@ -109,8 +131,18 @@ export function useCreateWatchlist() {
 export function useUpdateWatchlist() {
   return useMutation({
     mutationFn: updateWatchlist,
-    onSuccess: async () => {
+    onSuccess: async (_data, variables) => {
       await queryClient.invalidateQueries({ queryKey: watchlistsQueryKey });
+      await queryClient.invalidateQueries({
+        queryKey: getWatchlistQueryKey(variables.current.title),
+      });
+
+      const nextTitle = variables.next.title;
+      if (nextTitle && nextTitle !== variables.current.title) {
+        await queryClient.invalidateQueries({
+          queryKey: getWatchlistQueryKey(nextTitle),
+        });
+      }
     },
   });
 }

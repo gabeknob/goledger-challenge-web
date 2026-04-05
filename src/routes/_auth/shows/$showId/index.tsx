@@ -11,6 +11,7 @@ import { ResponsiveActionMenu } from "#/components/ResponsiveActionMenu";
 import { RouteErrorState } from "#/components/RouteErrorState";
 import { SeasonFormDialog } from "#/components/SeasonFormDialog";
 import { ShowFormDialog } from "#/components/ShowFormDialog";
+import { WatchlistMembershipPopover } from "#/components/WatchlistMembershipPopover";
 import { Button } from "#/components/ui/button";
 import {
   DropdownMenu,
@@ -450,9 +451,7 @@ function ShowHero({
           <Button variant="secondary" onClick={onDelete} disabled={!show}>
             Delete Show
           </Button>
-          <Button variant="outline" disabled>
-            + Watchlist
-          </Button>
+          <WatchlistMembershipPopover show={show} />
         </div>
       </div>
     </section>

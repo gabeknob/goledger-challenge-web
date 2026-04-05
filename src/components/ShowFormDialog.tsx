@@ -20,7 +20,7 @@ import {
   useCreateShow,
   useUpdateShow,
 } from "#/hooks/useShows";
-import { getApiErrorMessage } from "#/lib/api-errors";
+import { getApiErrorMessage } from "#/lib/api/errors";
 import { createTvShowSchema, type TvShowFormValues } from "#/schemas/tvShow";
 import type { TvShow } from "#/types/tvShow";
 

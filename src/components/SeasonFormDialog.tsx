@@ -14,7 +14,7 @@ import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import { useCreateSeason, useUpdateSeason } from "#/hooks/useSeasons";
-import { getApiErrorMessage } from "#/lib/api-errors";
+import { getApiErrorMessage } from "#/lib/api/errors";
 import { createSeasonSchema, type SeasonFormValues } from "#/schemas/season";
 import type { Season, TvShowReference } from "#/types/season";
 

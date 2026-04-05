@@ -11,7 +11,7 @@ import {
   AlertDialogTitle,
 } from "#/components/ui/alert-dialog";
 import { useDeleteWatchlist } from "#/hooks/useWatchlists";
-import { getApiErrorMessage } from "#/lib/api-errors";
+import { getApiErrorMessage } from "#/lib/api/errors";
 import type { Watchlist } from "#/types/watchlist";
 
 interface DeleteWatchlistDialogProps {

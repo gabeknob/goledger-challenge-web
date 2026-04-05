@@ -17,7 +17,7 @@ import {
   type ShowCascadeTaskStatus,
   useCascadeDeleteShow,
 } from "#/hooks/useShows";
-import { getApiErrorMessage } from "#/lib/api-errors";
+import { getApiErrorMessage } from "#/lib/api/errors";
 import type { TvShow } from "#/types/tvShow";
 
 interface DeleteShowDialogProps {

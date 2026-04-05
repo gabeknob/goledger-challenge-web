@@ -15,7 +15,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "#/components/ui/popover";
 import { Button } from "#/components/ui/button";
 import { useUpdateWatchlist, useWatchlists } from "#/hooks/useWatchlists";
-import { getApiErrorMessage } from "#/lib/api-errors";
+import { getApiErrorMessage } from "#/lib/api/errors";
 import type { TvShowReference } from "#/types/season";
 import type { TvShow } from "#/types/tvShow";
 

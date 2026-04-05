@@ -15,7 +15,7 @@ import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import { Textarea } from "#/components/ui/textarea";
 import { useCreateWatchlist, useUpdateWatchlist } from "#/hooks/useWatchlists";
-import { getApiErrorMessage } from "#/lib/api-errors";
+import { getApiErrorMessage } from "#/lib/api/errors";
 import { createWatchlistSchema, type WatchlistFormValues } from "#/schemas/watchlist";
 import type { Watchlist } from "#/types/watchlist";
 

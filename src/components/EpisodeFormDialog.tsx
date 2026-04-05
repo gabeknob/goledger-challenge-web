@@ -15,7 +15,7 @@ import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import { Textarea } from "#/components/ui/textarea";
 import { useCreateEpisode, useUpdateEpisode } from "#/hooks/useEpisodes";
-import { getApiErrorMessage } from "#/lib/api-errors";
+import { getApiErrorMessage } from "#/lib/api/errors";
 import { createEpisodeSchema, type EpisodeFormValues } from "#/schemas/episode";
 import type { Episode } from "#/types/episode";
 import type { SeasonReference } from "#/types/season";

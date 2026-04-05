@@ -1,6 +1,6 @@
 import { AxiosError } from "axios";
 
-import { getApiErrorMessage } from "#/lib/api-errors";
+import { getApiErrorMessage } from "#/lib/api/errors";
 
 describe("getApiErrorMessage", () => {
   it("prefers the API payload message when available", () => {

@@ -13,7 +13,7 @@ import { WatchlistShowCard } from "#/components/WatchlistShowCard";
 import { Button } from "#/components/ui/button";
 import { useShows } from "#/hooks/useShows";
 import { useUpdateWatchlist, useWatchlist, useWatchlists } from "#/hooks/useWatchlists";
-import { getApiErrorMessage } from "#/lib/api-errors";
+import { getApiErrorMessage } from "#/lib/api/errors";
 import type { TvShow } from "#/types/tvShow";
 
 export const Route = createFileRoute("/_auth/watchlists/$title")({

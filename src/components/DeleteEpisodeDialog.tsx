@@ -11,7 +11,7 @@ import {
   AlertDialogTitle,
 } from "#/components/ui/alert-dialog";
 import { useDeleteEpisode } from "#/hooks/useEpisodes";
-import { getApiErrorMessage } from "#/lib/api-errors";
+import { getApiErrorMessage } from "#/lib/api/errors";
 import type { Episode } from "#/types/episode";
 
 interface DeleteEpisodeDialogProps {

@@ -22,7 +22,7 @@ import {
 import { Button } from "#/components/ui/button";
 import { useTMDB } from "#/hooks/useTMDB";
 import { useUpdateWatchlist } from "#/hooks/useWatchlists";
-import { getApiErrorMessage } from "#/lib/api-errors";
+import { getApiErrorMessage } from "#/lib/api/errors";
 import type { TvShowReference } from "#/types/season";
 import type { TvShow } from "#/types/tvShow";
 import type { Watchlist } from "#/types/watchlist";

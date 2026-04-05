@@ -61,7 +61,13 @@ function AlertDialogHeader({ className, ...props }: React.ComponentProps<"div">)
 
 function AlertDialogFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <div className={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)} {...props} />
+    <div
+      className={cn(
+        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end [&>[data-slot=alert-dialog-action]]:h-11 [&>[data-slot=alert-dialog-action]]:rounded-2xl [&>[data-slot=alert-dialog-action]]:px-4 [&>[data-slot=alert-dialog-action]]:text-sm [&>[data-slot=alert-dialog-cancel]]:h-11 [&>[data-slot=alert-dialog-cancel]]:rounded-2xl [&>[data-slot=alert-dialog-cancel]]:px-4 [&>[data-slot=alert-dialog-cancel]]:text-sm md:[&>[data-slot=alert-dialog-action]]:h-7 md:[&>[data-slot=alert-dialog-action]]:rounded-md md:[&>[data-slot=alert-dialog-action]]:px-2 md:[&>[data-slot=alert-dialog-action]]:text-xs md:[&>[data-slot=alert-dialog-cancel]]:h-7 md:[&>[data-slot=alert-dialog-cancel]]:rounded-md md:[&>[data-slot=alert-dialog-cancel]]:px-2 md:[&>[data-slot=alert-dialog-cancel]]:text-xs",
+        className,
+      )}
+      {...props}
+    />
   );
 }
 
@@ -97,6 +103,7 @@ function AlertDialogAction({
 }: React.ComponentProps<typeof AlertDialogPrimitive.Action>) {
   return (
     <AlertDialogPrimitive.Action
+      data-slot="alert-dialog-action"
       className={cn(buttonVariants({ variant: "destructive" }), className)}
       {...props}
     />
@@ -109,6 +116,7 @@ function AlertDialogCancel({
 }: React.ComponentProps<typeof AlertDialogPrimitive.Cancel>) {
   return (
     <AlertDialogPrimitive.Cancel
+      data-slot="alert-dialog-cancel"
       className={cn(buttonVariants({ variant: "outline" }), className)}
       {...props}
     />

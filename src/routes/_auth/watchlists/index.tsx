@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
+  Bookmark01Icon,
   Cancel01Icon,
   Search01Icon,
   SortByDown01Icon,
@@ -9,6 +10,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 
 import { DeleteWatchlistDialog } from "#/components/DeleteWatchlistDialog";
+import { EmptyState } from "#/components/EmptyState";
 import { WatchlistCard, WatchlistCardSkeleton } from "#/components/WatchlistCard";
 import { WatchlistFormDialog } from "#/components/WatchlistFormDialog";
 import { Button } from "#/components/ui/button";
@@ -120,33 +122,31 @@ function WatchlistsPage() {
         ) : null}
 
         {!isLoading && !isError && filteredWatchlists.length === 0 ? (
-          <div className="rounded-4xl border border-dashed border-border bg-card/50 px-6 py-16 text-center">
+          <div className="py-2">
             {search ? (
-              <>
-                <p className="display-title text-2xl font-semibold text-foreground">
-                  No watchlists matching "{search}"
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setSearch("")}
-                  className="mt-3 text-sm text-primary underline-offset-4 hover:underline"
-                >
-                  Clear search
-                </button>
-              </>
+              <EmptyState
+                icon={<HugeiconsIcon icon={Search01Icon} className="size-6" />}
+                title={`No watchlists matching "${search}"`}
+                description="Try a different name or clear the search to bring your saved collections back into view."
+                action={
+                  <button
+                    type="button"
+                    onClick={() => setSearch("")}
+                    className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+                  >
+                    Clear search
+                  </button>
+                }
+              />
             ) : (
-              <>
-                <p className="display-title text-2xl font-semibold text-foreground">
-                  No watchlists yet
-                </p>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Create your first watchlist to start grouping shows by mood, genre, or anything
-                  else.
-                </p>
-                <Button className="mt-4" onClick={() => setCreatingWatchlist(true)}>
-                  Create watchlist
-                </Button>
-              </>
+              <EmptyState
+                icon={<HugeiconsIcon icon={Bookmark01Icon} className="size-6" />}
+                title="No watchlists yet"
+                description="Create your first watchlist to start grouping shows by mood, genre, weekend plans, or anything else."
+                action={
+                  <Button onClick={() => setCreatingWatchlist(true)}>Create watchlist</Button>
+                }
+              />
             )}
           </div>
         ) : null}

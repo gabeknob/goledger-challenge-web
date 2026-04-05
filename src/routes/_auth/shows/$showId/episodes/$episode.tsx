@@ -131,7 +131,7 @@ function EpisodeDetailPage() {
         onDelete={() => setDeletingEpisodeOpen(true)}
         onEdit={() => setEditingEpisodeOpen(true)}
       />
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8">
         <section className="grid gap-4 md:grid-cols-[minmax(0,1.65fr)_minmax(19rem,1fr)]">
           <EpisodeDescriptionCard episode={episode ?? null} isLoading={isEpisodeLoading} />
           <EpisodeMetaCard
@@ -220,7 +220,7 @@ function EpisodeHeader({
       ) : null}
       <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-background/55 to-background" />
 
-      <div className="relative mx-auto grid min-h-[23rem] w-full max-w-6xl gap-6 px-4 py-8 md:min-h-[26rem] md:grid-cols-[18rem_minmax(0,1fr)] md:items-end">
+      <div className="relative mx-auto grid min-h-[23rem] w-full max-w-7xl gap-6 px-4 py-8 md:min-h-[26rem] md:grid-cols-[18rem_minmax(0,1fr)] md:items-end">
         <div className="relative aspect-video overflow-hidden rounded-4xl border border-background/20 shadow-2xl md:aspect-[4/5]">
           {isLoading ? (
             <Skeleton className="size-full rounded-none bg-background/20" />

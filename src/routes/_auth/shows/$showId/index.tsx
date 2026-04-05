@@ -11,7 +11,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { DeleteEpisodeDialog } from "#/components/DeleteEpisodeDialog";
 import { DeleteSeasonDialog } from "#/components/DeleteSeasonDialog";
 import { DeleteShowDialog } from "#/components/DeleteShowDialog";
-import { TaskList } from "#/components/DeletionTaskList";
+import { TaskList } from "#/components/TaskList";
 import { EmptyState } from "#/components/EmptyState";
 import { EpisodeFormDialog } from "#/components/EpisodeFormDialog";
 import { ResponsiveActionMenu } from "#/components/ResponsiveActionMenu";

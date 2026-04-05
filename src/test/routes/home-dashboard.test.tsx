@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 
 import { api } from "#/lib/api";
 import { makeTvShow, makeWatchlist } from "#/test/factories";
-import { HomePage } from "#/routes/_auth/index";
+import { HomePage } from "#/pages/_auth/HomePage";
 import { renderRoute } from "#/test/test-utils";
 
 const useShowsMock = vi.fn();

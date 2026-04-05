@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { act, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { ShowsPage } from "#/routes/_auth/shows/index";
+import { ShowsPage } from "#/pages/_auth/shows/ShowsPage";
 import { getIntersectionObservers } from "#/test/browser-mocks";
 import { makeTvShow } from "#/test/factories";
 import { renderRoute } from "#/test/test-utils";

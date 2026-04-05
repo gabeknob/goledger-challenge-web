@@ -50,7 +50,7 @@ export function Breadcrumbs() {
         rest.length === 0 && "hidden md:block",
       )}
     >
-      <div className="mx-auto max-w-7xl px-4">
+      <div className="mx-auto max-w-7xl px-4 md:pl-5">
         {/* Mobile: immediate parent only */}
         {rest.length > 0 && (
           <Link

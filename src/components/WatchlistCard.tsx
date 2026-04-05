@@ -55,8 +55,8 @@ export function WatchlistCard({
         className="flex h-[22.5rem] flex-col"
       >
         <WatchlistArtwork itemTitles={itemTitles} title={watchlist.title} />
-        <CardContent className="flex flex-1 flex-col gap-3 p-4 pt-0">
-          <div className="-mt-10 mb-1 flex">
+        <CardContent className="relative z-10 flex flex-1 flex-col gap-3 p-4 pt-0">
+          <div className="relative z-10 -mt-10 mb-1 flex">
             <div className="size-20 overflow-hidden rounded-3xl border border-card-foreground/12 shadow-2xl">
               <WatchlistCover itemTitles={itemTitles} title={watchlist.title} />
             </div>
@@ -113,7 +113,7 @@ function WatchlistArtwork({ itemTitles, title }: { itemTitles: string[]; title: 
 
   return (
     <div className={`relative h-28 overflow-hidden ${hasArtwork ? "bg-background" : fallbackTone}`}>
-      <div className="absolute inset-0 scale-110 blur-sm saturate-150">
+      <div className="absolute inset-0 scale-110 blur-sm saturate-120">
         {hasArtwork ? (
           hasSplitArtwork ? (
             <WatchlistPosterSplit posterTitles={backgroundTitles} />
@@ -168,9 +168,11 @@ function WatchlistPosterSplit({ posterTitles }: { posterTitles: string[] }) {
 
 function WatchlistEmptyCover({ title }: { title: string }) {
   return (
-    <div className="flex size-full items-end bg-background/95 p-3">
-      <div className="rounded-2xl bg-muted px-3 py-2">
-        <span className="line-clamp-2 text-sm font-semibold text-foreground">{title}</span>
+    <div className="flex size-full items-end bg-background/95">
+      <div className="flex size-full items-end rounded-none bg-muted p-0">
+        <span className="p-0 text-sm font-semibold text-foreground pb-3 line-clamp-3 pl-3">
+          {title}
+        </span>
       </div>
     </div>
   );

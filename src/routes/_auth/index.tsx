@@ -285,8 +285,8 @@ function HorizontalShowsSection({
           No shows yet. Add your first title to start building the dashboard.
         </SectionMessage>
       ) : (
-        <div className="-mx-4 overflow-x-auto px-4">
-          <div className="flex gap-4 pb-2">
+        <div className="-mx-4 -mt-3 overflow-x-auto px-4">
+          <div className="flex gap-4 pb-2 pt-4">
             {shows.map(show => (
               <HomeShowCard key={show["@key"]} show={show} />
             ))}
@@ -457,14 +457,14 @@ function HomeShowCard({ show }: { show: TvShow }) {
 
 function SeeMoreShowsCard() {
   return (
-    <Card className="w-[11rem] shrink-0 overflow-hidden rounded-[1.5rem] border border-dashed border-border bg-card shadow-sm transition-shadow hover:shadow-md">
-      <Link to="/shows" className="flex h-full min-h-[16.5rem] flex-col justify-between p-4">
+    <Card className="aspect-[2/3] w-[11rem] shrink-0 overflow-hidden rounded-[1.5rem] border border-dashed border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+      <Link to="/shows" className="flex h-full flex-col justify-between p-4">
         <div className="space-y-2">
           <p className="text-xs font-semibold tracking-[0.22em] uppercase text-muted-foreground">
             More to browse
           </p>
           <h3 className="display-title text-2xl font-semibold text-foreground">See more</h3>
-          <p className="text-sm leading-6 text-muted-foreground">
+          <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
             Open the full catalogue to keep exploring your shows.
           </p>
         </div>

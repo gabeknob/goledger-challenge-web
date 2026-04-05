@@ -76,9 +76,9 @@ export function WatchlistCard({
           <div className="flex flex-wrap gap-2">
             {visibleItems.length > 0 ? (
               <>
-                {visibleItems.map(title => (
+                {visibleItems.map((title, index) => (
                   <span
-                    key={title}
+                    key={`${title}-${index}`}
                     className="max-w-full rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-foreground"
                   >
                     <span className="block max-w-28 truncate">{title}</span>

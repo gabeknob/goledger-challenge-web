@@ -144,7 +144,6 @@ function ShowDetailPage() {
         fallbackTitle={decodedShowId}
         posterUrl={posterUrl}
         isLoading={isShowLoading}
-        isError={isShowError}
         onEdit={() => setIsEditOpen(true)}
         onDelete={() => setIsDeleteOpen(true)}
       />

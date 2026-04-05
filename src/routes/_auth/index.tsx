@@ -23,7 +23,7 @@ const alphabeticalShowsQueryKey = ["home", "alphabeticalShows"] as const;
 const homeWatchlistsQueryKey = ["home", "watchlists"] as const;
 const HOME_ALPHABETICAL_SHOWS_LIMIT = 10;
 
-function HomePage() {
+export function HomePage() {
   const { data: shows = [] } = useShows();
   const recentShowsQuery = useQuery({
     queryKey: recentShowsQueryKey,

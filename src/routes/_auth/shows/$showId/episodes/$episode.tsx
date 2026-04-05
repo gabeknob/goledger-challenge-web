@@ -42,7 +42,7 @@ export const Route = createFileRoute("/_auth/shows/$showId/episodes/$episode")({
   component: EpisodeDetailPage,
 });
 
-function EpisodeDetailPage() {
+export function EpisodeDetailPage() {
   const { showId } = Route.useParams();
   const { episodeNumber, seasonNumber } = Route.useLoaderData();
   const decodedShowId = decodeURIComponent(showId);

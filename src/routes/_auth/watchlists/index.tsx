@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_auth/watchlists/")({
 
 type SortOrder = "az" | "za";
 
-function WatchlistsPage() {
+export function WatchlistsPage() {
   const { data: shows = [] } = useShows();
   const { data: watchlists, isError, isLoading } = useWatchlists();
   const [creatingWatchlist, setCreatingWatchlist] = useState(false);

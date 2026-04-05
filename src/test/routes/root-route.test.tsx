@@ -12,10 +12,19 @@ describe("root route", () => {
   }, 15000);
 
   it("renders the route error component", () => {
-    const ErrorComponent = RootRoute.options.errorComponent!;
+    const errorComponent = RootRoute.options.errorComponent;
+
+    if (!errorComponent) {
+      throw new Error("Expected root route to define an error component");
+    }
 
     return renderRoute({
-      component: () => <ErrorComponent error={new Error("Boom")} info={{ componentStack: "" }} />,
+      component: () =>
+        errorComponent({
+          error: new Error("Boom"),
+          info: { componentStack: "" },
+          reset: () => {},
+        }),
       path: "/error",
       additionalRoutes: [{ path: "/" }],
     }).then(() => {

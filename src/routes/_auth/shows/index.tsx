@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_auth/shows/")({
   component: ShowsPage,
 });
 
-function ShowsPage() {
+export function ShowsPage() {
   const [search, setSearch] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingShow, setEditingShow] = useState<TvShow | null>(null);

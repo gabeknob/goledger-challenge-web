@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Bookmark01Icon } from "@hugeicons/core-free-icons";
+import { Add01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { toast } from "sonner";
 
 import { DeleteWatchlistDialog } from "#/components/DeleteWatchlistDialog";
 import { EmptyState } from "#/components/EmptyState";
 import { RouteErrorState } from "#/components/RouteErrorState";
+import { WatchlistAddShowsDialog } from "#/components/WatchlistAddShowsDialog";
 import { WatchlistFormDialog } from "#/components/WatchlistFormDialog";
 import { WatchlistShowCard } from "#/components/WatchlistShowCard";
 import { Button } from "#/components/ui/button";
@@ -30,6 +31,7 @@ function WatchlistDetailPage() {
   const { data: watchlist, isError, isLoading } = useWatchlist(decodedTitle);
   const { data: shows = [] } = useShows();
   const updateWatchlist = useUpdateWatchlist();
+  const [addingShows, setAddingShows] = useState(false);
   const [editingWatchlist, setEditingWatchlist] = useState(false);
   const [deletingWatchlist, setDeletingWatchlist] = useState(false);
 
@@ -104,6 +106,9 @@ function WatchlistDetailPage() {
               </div>
 
               <div className="flex flex-wrap gap-2">
+                <Button onClick={() => setAddingShows(true)} disabled={!watchlist}>
+                  Add Show
+                </Button>
                 <Button
                   variant="secondary"
                   onClick={() => setEditingWatchlist(true)}
@@ -126,9 +131,10 @@ function WatchlistDetailPage() {
 
           {!isLoading && watchlist && watchlistShows.length === 0 ? (
             <EmptyState
-              icon={<HugeiconsIcon icon={Bookmark01Icon} className="size-6" />}
+              icon={<HugeiconsIcon icon={Add01Icon} className="size-6" />}
               title="No shows yet"
-              description="Add shows from the browse page or from a show detail view to start building this watchlist."
+              description="Pick shows from your catalogue to start building this watchlist."
+              action={<Button onClick={() => setAddingShows(true)}>Add Show</Button>}
             />
           ) : null}
 
@@ -154,6 +160,12 @@ function WatchlistDetailPage() {
           });
         }}
         open={editingWatchlist}
+        watchlist={watchlist ?? null}
+      />
+      <WatchlistAddShowsDialog
+        onOpenChange={setAddingShows}
+        open={addingShows}
+        shows={shows}
         watchlist={watchlist ?? null}
       />
 

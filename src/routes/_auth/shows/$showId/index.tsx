@@ -198,7 +198,7 @@ function ShowDetailPage() {
                             resetScroll: false,
                           })
                         }
-                        className="h-full min-w-0 flex-1 rounded-full px-3 py-2 text-sm font-medium text-shadow-md"
+                        className="h-full min-w-0 truncate flex-1 rounded-full px-3 py-2 text-sm font-medium text-shadow-md"
                       >
                         Season {season.number}
                       </button>
@@ -214,7 +214,7 @@ function ShowDetailPage() {
                             }`}
                           >
                             <HugeiconsIcon icon={PencilEdit02Icon} className="size-3.5" />
-                            <span>Edit</span>
+                            <span className="min-w-0">Edit</span>
                             <span className="sr-only">Season actions</span>
                           </Button>
                         </DropdownMenuTrigger>

@@ -19,6 +19,16 @@ const config = defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
+    coverage: {
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: [
+        "src/routeTree.gen.ts",
+        "src/components/ui/**",
+        "src/**/*.test.{ts,tsx}",
+        "src/test/**",
+        "src/types/**",
+      ],
+    },
   },
 });
 

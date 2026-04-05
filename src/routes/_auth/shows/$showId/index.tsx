@@ -1,17 +1,13 @@
 import { useMemo, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { Link, Navigate, createFileRoute } from "@tanstack/react-router";
-import {
-  Calendar03Icon,
-  Delete02Icon,
-  MoreHorizontalIcon,
-  PencilEdit02Icon,
-} from "@hugeicons/core-free-icons";
+import { Calendar03Icon, Delete02Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
 import { DeleteEpisodeDialog } from "#/components/DeleteEpisodeDialog";
 import { DeleteSeasonDialog } from "#/components/DeleteSeasonDialog";
 import { DeleteShowDialog } from "#/components/DeleteShowDialog";
 import { EpisodeFormDialog } from "#/components/EpisodeFormDialog";
+import { ResponsiveActionMenu } from "#/components/ResponsiveActionMenu";
 import { RouteErrorState } from "#/components/RouteErrorState";
 import { SeasonFormDialog } from "#/components/SeasonFormDialog";
 import { ShowFormDialog } from "#/components/ShowFormDialog";
@@ -636,43 +632,21 @@ function EpisodeRow({
           )}
           <div className="absolute inset-0 bg-linear-to-t from-foreground/30 via-transparent to-transparent" />
           <div className="absolute right-1.5 top-1.5 z-10 md:hidden">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="rounded-full border border-muted-foreground/40 bg-muted text-muted-foreground shadow-xl hover:bg-muted/90 hover:text-muted-foreground"
-                  onClick={event => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                  }}
-                >
-                  <HugeiconsIcon icon={MoreHorizontalIcon} className="size-4" />
-                  <span className="sr-only">Episode actions</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-32">
-                <DropdownMenuGroup>
-                  <DropdownMenuItem
-                    onSelect={event => {
-                      event.preventDefault();
-                      onEdit(episode);
-                    }}
-                  >
-                    Edit
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    variant="destructive"
-                    onSelect={event => {
-                      event.preventDefault();
-                      onDelete(episode);
-                    }}
-                  >
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <ResponsiveActionMenu
+              title="Episode actions"
+              description={`Manage ${episode.title}`}
+              actions={[
+                {
+                  label: "Edit",
+                  onSelect: () => onEdit(episode),
+                },
+                {
+                  label: "Delete",
+                  onSelect: () => onDelete(episode),
+                  destructive: true,
+                },
+              ]}
+            />
           </div>
         </div>
         <div className="flex flex-col gap-2">

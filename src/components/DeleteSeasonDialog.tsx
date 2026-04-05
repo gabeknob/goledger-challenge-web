@@ -11,7 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "#/components/ui/alert-dialog";
-import { TaskList, type TaskStatus } from "#/components/DeletionTaskList";
+import { TaskList, type TaskStatus } from "#/components/TaskList";
 import { useDeleteSeason } from "#/hooks/useSeasons";
 import { getApiErrorMessage } from "#/lib/api-errors";
 import type { Episode } from "#/types/episode";

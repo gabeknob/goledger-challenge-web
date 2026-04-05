@@ -83,6 +83,3 @@ export function TaskList({
     </div>
   );
 }
-
-export { TaskList as DeletionTaskList };
-export type { TaskStatus as DeletionTaskStatus };

@@ -7,12 +7,22 @@ import { getIntersectionObservers } from "#/test/browser-mocks";
 import { makeTvShow } from "#/test/factories";
 import { renderRoute } from "#/test/test-utils";
 
+const navigateMock = vi.fn();
 const useCascadeDeleteShowMock = vi.fn();
 const useCreateShowMock = vi.fn();
 const useDebouncedStateMock = vi.fn();
 const useShowsBrowseMock = vi.fn();
 const useTMDBMock = vi.fn();
 const useUpdateShowMock = vi.fn();
+
+vi.mock("@tanstack/react-router", async (importOriginal: <T>() => Promise<T>) => {
+  const actual = await importOriginal<typeof import("@tanstack/react-router")>();
+
+  return {
+    ...actual,
+    useNavigate: () => navigateMock,
+  };
+});
 
 vi.mock("#/lib/auth", async (importOriginal: <T>() => Promise<T>) => {
   const actual = await importOriginal<typeof import("#/lib/auth")>();
@@ -70,6 +80,7 @@ vi.mock("#/components/ui/dropdown-menu", () => ({
 
 describe("/shows page", () => {
   beforeEach(() => {
+    navigateMock.mockReset();
     useCascadeDeleteShowMock.mockReturnValue({
       isPending: false,
       mutateAsync: vi.fn().mockResolvedValue({
@@ -287,4 +298,40 @@ describe("/shows page", () => {
     await user.click(screen.getByRole("button", { name: "Cancel" }));
     expect(screen.queryByText("Delete show and related data?")).not.toBeInTheDocument();
   });
+
+  it("navigates to the renamed show page after saving an edited title", async () => {
+    const user = userEvent.setup();
+    const updateShowMutateAsyncMock = vi.fn().mockResolvedValue(undefined);
+
+    useUpdateShowMock.mockReturnValue({
+      isPending: false,
+      mutateAsync: updateShowMutateAsyncMock,
+    });
+    useShowsBrowseMock.mockReturnValue({
+      data: { pages: [{ items: [makeTvShow({ title: "Ted Lasso" })] }] },
+      fetchNextPage: vi.fn(),
+      hasNextPage: false,
+      isError: false,
+      isFetchingNextPage: false,
+      isLoading: false,
+    });
+
+    await renderRoute({
+      component: ShowsPage,
+      path: "/shows",
+    });
+
+    await user.click(screen.getByRole("button", { name: "Options" }));
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    await user.clear(screen.getByLabelText("Title"));
+    await user.type(screen.getByLabelText("Title"), "Ted Lasso Reloaded");
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    expect(updateShowMutateAsyncMock).toHaveBeenCalled();
+    expect(navigateMock).toHaveBeenCalledWith({
+      params: { showId: "Ted Lasso Reloaded" },
+      search: { season: undefined },
+      to: "/shows/$showId",
+    });
+  }, 20000);
 });

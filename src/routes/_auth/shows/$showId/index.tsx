@@ -1,11 +1,17 @@
 import { useMemo, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { Link, Navigate, createFileRoute } from "@tanstack/react-router";
-import { Calendar03Icon, Delete02Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
+import {
+  Calendar03Icon,
+  Delete02Icon,
+  PencilEdit02Icon,
+  Tv01Icon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
 import { DeleteEpisodeDialog } from "#/components/DeleteEpisodeDialog";
 import { DeleteSeasonDialog } from "#/components/DeleteSeasonDialog";
 import { DeleteShowDialog } from "#/components/DeleteShowDialog";
+import { EmptyState } from "#/components/EmptyState";
 import { EpisodeFormDialog } from "#/components/EpisodeFormDialog";
 import { ResponsiveActionMenu } from "#/components/ResponsiveActionMenu";
 import { RouteErrorState } from "#/components/RouteErrorState";
@@ -516,18 +522,20 @@ function EpisodeList({
 
   if (episodes.length === 0) {
     return (
-      <div className="rounded-3xl border border-dashed border-border bg-card/50 px-6 py-12 text-center">
-        <p className="display-title text-2xl font-semibold text-foreground">No episodes yet</p>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Season {season.number} is ready for its first episode.
-        </p>
-        <Button
-          className="mt-4 h-10 w-full text-sm font-semibold md:mx-auto md:w-auto md:px-5"
-          onClick={onAddEpisode}
-        >
-          Add an Episode
-        </Button>
-      </div>
+      <EmptyState
+        icon={<HugeiconsIcon icon={Calendar03Icon} className="size-6" />}
+        title="No episodes yet"
+        description={`Season ${season.number} is ready for its first episode.`}
+        action={
+          <Button
+            className="h-10 w-full text-sm font-semibold md:w-auto md:px-5"
+            onClick={onAddEpisode}
+          >
+            Add an Episode
+          </Button>
+        }
+        className="rounded-3xl py-12"
+      />
     );
   }
 
@@ -709,13 +717,17 @@ function EmptySeasonState({
   onAddSeason: () => void;
 }) {
   return (
-    <div className="rounded-3xl border border-dashed border-border bg-card/50 px-6 py-12 text-center">
-      <p className="display-title text-2xl font-semibold text-foreground">No seasons yet</p>
-      <p className="mt-2 text-sm text-muted-foreground">This show is ready for its first season.</p>
-      <Button className="mt-4" disabled={disabled} onClick={onAddSeason}>
-        Add a Season
-      </Button>
-    </div>
+    <EmptyState
+      icon={<HugeiconsIcon icon={Tv01Icon} className="size-6" />}
+      title="No seasons yet"
+      description="This show is ready for its first season."
+      action={
+        <Button disabled={disabled} onClick={onAddSeason}>
+          Add a Season
+        </Button>
+      }
+      className="rounded-3xl py-12"
+    />
   );
 }
 

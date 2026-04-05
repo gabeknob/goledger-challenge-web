@@ -5,9 +5,11 @@ import {
   Search01Icon,
   SortByDown01Icon,
   SortByUp01Icon,
+  Tv01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { DeleteShowDialog } from "#/components/DeleteShowDialog";
+import { EmptyState } from "#/components/EmptyState";
 import { ShowFormDialog } from "#/components/ShowFormDialog";
 import { ShowCard, ShowCardSkeleton } from "#/components/ShowCard";
 import { Button } from "#/components/ui/button";
@@ -108,19 +110,29 @@ function ShowsPage() {
       )}
 
       {!isLoading && !isError && filtered.length === 0 && (
-        <div className="py-20 text-center">
+        <div className="py-8">
           {search ? (
-            <>
-              <p className="text-muted-foreground">No shows matching &ldquo;{search}&rdquo;</p>
-              <button
-                onClick={() => setSearch("")}
-                className="mt-2 text-sm text-primary underline-offset-4 hover:underline"
-              >
-                Clear search
-              </button>
-            </>
+            <EmptyState
+              icon={<HugeiconsIcon icon={Search01Icon} className="size-6" />}
+              title={`No shows matching "${search}"`}
+              description="Try a different title or clear the current search to see your full catalogue again."
+              action={
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  Clear search
+                </button>
+              }
+            />
           ) : (
-            <p className="text-muted-foreground">No shows yet.</p>
+            <EmptyState
+              icon={<HugeiconsIcon icon={Tv01Icon} className="size-6" />}
+              title="No shows yet"
+              description="Add your first show to start building your catalogue and unlock seasons, episodes, and watchlists."
+              action={<Button onClick={() => setIsCreateOpen(true)}>Add your first show</Button>}
+            />
           )}
         </div>
       )}

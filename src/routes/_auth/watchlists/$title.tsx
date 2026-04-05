@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { Bookmark01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { toast } from "sonner";
 
 import { DeleteWatchlistDialog } from "#/components/DeleteWatchlistDialog";
+import { EmptyState } from "#/components/EmptyState";
 import { RouteErrorState } from "#/components/RouteErrorState";
 import { WatchlistFormDialog } from "#/components/WatchlistFormDialog";
 import { WatchlistShowCard } from "#/components/WatchlistShowCard";
@@ -122,12 +125,11 @@ function WatchlistDetailPage() {
           {isLoading ? <p className="text-sm text-muted-foreground">Loading watchlist...</p> : null}
 
           {!isLoading && watchlist && watchlistShows.length === 0 ? (
-            <div className="rounded-4xl border border-dashed border-border bg-card/50 px-6 py-16 text-center">
-              <p className="display-title text-2xl font-semibold text-foreground">No shows yet</p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Add shows from the show detail page to start building this watchlist.
-              </p>
-            </div>
+            <EmptyState
+              icon={<HugeiconsIcon icon={Bookmark01Icon} className="size-6" />}
+              title="No shows yet"
+              description="Add shows from the browse page or from a show detail view to start building this watchlist."
+            />
           ) : null}
 
           {!isLoading && watchlistShows.length > 0 ? (

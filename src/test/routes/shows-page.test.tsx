@@ -39,16 +39,68 @@ vi.mock("#/components/BottomTabBar", () => ({
 }));
 
 vi.mock("#/components/ShowCard", () => ({
-  ShowCard: ({ show }: { show: { title: string } }) => <div>{show.title}</div>,
+  ShowCard: ({
+    onDelete,
+    onEdit,
+    show,
+  }: {
+    onDelete: (show: { title: string }) => void;
+    onEdit: (show: { title: string }) => void;
+    show: { title: string };
+  }) => (
+    <div>
+      <div>{show.title}</div>
+      <button type="button" onClick={() => onEdit(show)}>
+        Edit {show.title}
+      </button>
+      <button type="button" onClick={() => onDelete(show)}>
+        Delete {show.title}
+      </button>
+    </div>
+  ),
   ShowCardSkeleton: () => <div data-testid="show-card-skeleton">Loading</div>,
 }));
 
 vi.mock("#/components/ShowFormDialog", () => ({
-  ShowFormDialog: () => null,
+  ShowFormDialog: ({
+    mode,
+    onOpenChange,
+    open,
+    show,
+  }: {
+    mode: "create" | "edit";
+    onOpenChange: (open: boolean) => void;
+    open: boolean;
+    show?: { title: string } | null;
+  }) =>
+    open ? (
+      <div>
+        <div>{mode === "create" ? "Create show dialog" : `Edit ${show?.title}`}</div>
+        <button type="button" onClick={() => onOpenChange(false)}>
+          Close show dialog
+        </button>
+      </div>
+    ) : null,
 }));
 
 vi.mock("#/components/DeleteShowDialog", () => ({
-  DeleteShowDialog: () => null,
+  DeleteShowDialog: ({
+    onOpenChange,
+    open,
+    show,
+  }: {
+    onOpenChange: (open: boolean) => void;
+    open: boolean;
+    show?: { title: string } | null;
+  }) =>
+    open ? (
+      <div>
+        <div>Delete {show?.title}</div>
+        <button type="button" onClick={() => onOpenChange(false)}>
+          Close delete show
+        </button>
+      </div>
+    ) : null,
 }));
 
 describe("/shows page", () => {
@@ -72,6 +124,17 @@ describe("/shows page", () => {
   });
 
   it("shows the empty state when there are no shows", async () => {
+    const user = userEvent.setup();
+
+    useShowsBrowseMock.mockReturnValueOnce({
+      data: undefined,
+      fetchNextPage: vi.fn(),
+      hasNextPage: false,
+      isError: false,
+      isFetchingNextPage: false,
+      isLoading: false,
+    });
+
     await renderRoute({
       component: ShowsPage,
       path: "/shows",
@@ -79,6 +142,9 @@ describe("/shows page", () => {
 
     expect(screen.getByText("No shows yet")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Add your first show" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Add your first show" }));
+    expect(screen.getByText("Create show dialog")).toBeInTheDocument();
   });
 
   it("shows the no-results state for an unmatched search", async () => {
@@ -92,6 +158,8 @@ describe("/shows page", () => {
     await user.type(screen.getByPlaceholderText("Search shows…"), "bleach");
 
     expect(await screen.findByText('No shows matching "bleach"')).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Clear search" }));
+    expect(screen.queryByText('No shows matching "bleach"')).not.toBeInTheDocument();
   });
 
   it("keeps current results visible while the search is debouncing", async () => {
@@ -154,5 +222,90 @@ describe("/shows page", () => {
     });
 
     expect(fetchNextPage).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows loading skeletons for the initial load and next-page fetches", async () => {
+    useShowsBrowseMock.mockReturnValueOnce({
+      data: { pages: [{ items: [] }] },
+      fetchNextPage: vi.fn(),
+      hasNextPage: false,
+      isError: false,
+      isFetchingNextPage: false,
+      isLoading: true,
+    });
+
+    const loadingRender = await renderRoute({
+      component: ShowsPage,
+      path: "/shows",
+    });
+
+    expect(loadingRender.getAllByTestId("show-card-skeleton")).toHaveLength(12);
+    loadingRender.unmount();
+
+    useShowsBrowseMock.mockReturnValue({
+      data: { pages: [{ items: [makeTvShow({ title: "Ted Lasso" })] }] },
+      fetchNextPage: vi.fn(),
+      hasNextPage: true,
+      isError: false,
+      isFetchingNextPage: true,
+      isLoading: false,
+    });
+
+    const nextPageRender = await renderRoute({
+      component: ShowsPage,
+      path: "/shows",
+    });
+
+    expect(nextPageRender.getAllByTestId("show-card-skeleton")).toHaveLength(6);
+  });
+
+  it("shows error state and opens or closes edit and delete dialogs", async () => {
+    const user = userEvent.setup();
+
+    useShowsBrowseMock.mockReturnValueOnce({
+      data: { pages: [{ items: [] }] },
+      fetchNextPage: vi.fn(),
+      hasNextPage: false,
+      isError: true,
+      isFetchingNextPage: false,
+      isLoading: false,
+    });
+
+    const errorRender = await renderRoute({
+      component: ShowsPage,
+      path: "/shows",
+    });
+
+    expect(screen.getByText("Failed to load shows. Please try again.")).toBeInTheDocument();
+    errorRender.unmount();
+
+    useShowsBrowseMock.mockReturnValue({
+      data: { pages: [{ items: [makeTvShow({ title: "Ted Lasso" })] }] },
+      fetchNextPage: vi.fn(),
+      hasNextPage: false,
+      isError: false,
+      isFetchingNextPage: false,
+      isLoading: false,
+    });
+
+    await renderRoute({
+      component: ShowsPage,
+      path: "/shows",
+    });
+
+    await user.click(screen.getByRole("button", { name: "New Show" }));
+    expect(screen.getByText("Create show dialog")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Close show dialog" }));
+    expect(screen.queryByRole("button", { name: "Close show dialog" })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Edit Ted Lasso" }));
+    expect(screen.getAllByText("Edit Ted Lasso").length).toBeGreaterThan(0);
+    await user.click(screen.getByRole("button", { name: "Close show dialog" }));
+    expect(screen.queryByRole("button", { name: "Close show dialog" })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Delete Ted Lasso" }));
+    expect(screen.getByRole("button", { name: "Close delete show" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Close delete show" }));
+    expect(screen.queryByRole("button", { name: "Close delete show" })).not.toBeInTheDocument();
   });
 });

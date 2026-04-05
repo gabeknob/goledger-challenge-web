@@ -293,8 +293,14 @@ describe("show detail route", () => {
   });
 
   it("normalizes the season search param", () => {
-    expect(ShowDetailRoute.options.validateSearch?.({ season: "2" })).toEqual({ season: 2 });
-    expect(ShowDetailRoute.options.validateSearch?.({ season: "   " })).toEqual({ season: undefined });
+    const validateSearch = ShowDetailRoute.options.validateSearch;
+
+    if (typeof validateSearch !== "function") {
+      throw new Error("Expected show detail validateSearch to be callable.");
+    }
+
+    expect(validateSearch({ season: "2" })).toEqual({ season: 2 });
+    expect(validateSearch({ season: "   " })).toEqual({ season: undefined });
   });
 
   it("renders the not-found state when the show query fails", async () => {

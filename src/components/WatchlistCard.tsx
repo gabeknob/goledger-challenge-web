@@ -12,6 +12,7 @@ interface WatchlistCardProps {
   itemTitles?: string[];
   onDelete: (watchlist: Watchlist) => void;
   onEdit: (watchlist: Watchlist) => void;
+  showActions?: boolean;
   watchlist: Watchlist;
 }
 
@@ -19,6 +20,7 @@ export function WatchlistCard({
   itemTitles = [],
   onDelete,
   onEdit,
+  showActions = true,
   watchlist,
 }: WatchlistCardProps) {
   const showsCount = watchlist.tvShows?.length ?? 0;
@@ -28,26 +30,28 @@ export function WatchlistCard({
 
   return (
     <Card className="group relative overflow-hidden rounded-4xl border border-border bg-card/80 pt-0 transition-shadow hover:shadow-md">
-      <div className="absolute right-3 top-3 z-10">
-        <ResponsiveActionMenu
-          title="Watchlist actions"
-          description={`Manage ${watchlist.title}`}
-          triggerClassName="size-6 rounded-full bg-background/85 opacity-100 shadow-sm backdrop-blur md:opacity-0 md:transition-opacity md:group-hover:opacity-100"
-          actions={[
-            {
-              label: "Edit",
-              onSelect: () => onEdit(watchlist),
-              icon: <HugeiconsIcon icon={PencilEdit02Icon} className="size-4" />,
-            },
-            {
-              label: "Delete",
-              onSelect: () => onDelete(watchlist),
-              destructive: true,
-              icon: <HugeiconsIcon icon={Delete02Icon} className="size-4" />,
-            },
-          ]}
-        />
-      </div>
+      {showActions ? (
+        <div className="absolute right-3 top-3 z-10">
+          <ResponsiveActionMenu
+            title="Watchlist actions"
+            description={`Manage ${watchlist.title}`}
+            triggerClassName="size-6 rounded-full bg-background/85 opacity-100 shadow-sm backdrop-blur md:opacity-0 md:transition-opacity md:group-hover:opacity-100"
+            actions={[
+              {
+                label: "Edit",
+                onSelect: () => onEdit(watchlist),
+                icon: <HugeiconsIcon icon={PencilEdit02Icon} className="size-4" />,
+              },
+              {
+                label: "Delete",
+                onSelect: () => onDelete(watchlist),
+                destructive: true,
+                icon: <HugeiconsIcon icon={Delete02Icon} className="size-4" />,
+              },
+            ]}
+          />
+        </div>
+      ) : null}
 
       <Link
         to="/watchlists/$title"

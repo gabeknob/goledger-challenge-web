@@ -5,6 +5,9 @@ import { makeEpisode, makeSeason, makeTvShow } from "#/test/factories";
 import { queryClient } from "#/lib/queryClient";
 import {
   EpisodeDetailPage,
+  episodeDetailRouteApi,
+} from "#/pages/_auth/shows/EpisodeDetailPage";
+import {
   Route as EpisodeRoute,
 } from "#/routes/_auth/shows/$showId/episodes/$episode";
 
@@ -51,16 +54,16 @@ describe("episode detail route", () => {
     createEpisodeMutateAsyncMock.mockReset();
     deleteEpisodeMutateAsyncMock.mockReset();
     updateEpisodeMutateAsyncMock.mockReset();
-    vi.spyOn(EpisodeRoute, "useParams").mockReturnValue({
+    vi.spyOn(episodeDetailRouteApi, "useParams").mockReturnValue({
       episode: "s1e1",
       showId: "Ted%20Lasso",
     } as never);
-    vi.spyOn(EpisodeRoute, "useLoaderData").mockReturnValue({
+    vi.spyOn(episodeDetailRouteApi, "useLoaderData").mockReturnValue({
       crumb: "S1E1",
       episodeNumber: 1,
       seasonNumber: 1,
     });
-    vi.spyOn(EpisodeRoute, "useNavigate").mockReturnValue(navigateMock);
+    vi.spyOn(episodeDetailRouteApi, "useNavigate").mockReturnValue(navigateMock);
 
     useShowMock.mockReturnValue({
       data: makeTvShow({ title: "Ted Lasso" }),
@@ -309,11 +312,11 @@ describe("episode detail route", () => {
       title: "New Day",
     });
 
-    vi.spyOn(EpisodeRoute, "useParams").mockReturnValue({
+    vi.spyOn(episodeDetailRouteApi, "useParams").mockReturnValue({
       episode: "s2e1",
       showId: "Ted%20Lasso",
     } as never);
-    vi.spyOn(EpisodeRoute, "useLoaderData").mockReturnValue({
+    vi.spyOn(episodeDetailRouteApi, "useLoaderData").mockReturnValue({
       crumb: "S2E1",
       episodeNumber: 1,
       seasonNumber: 2,

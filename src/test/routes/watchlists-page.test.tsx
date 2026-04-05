@@ -2,7 +2,7 @@ import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 
-import { WatchlistsPage } from "#/routes/_auth/watchlists/index";
+import { WatchlistsPage } from "#/pages/_auth/watchlists/WatchlistsPage";
 import { makeTvShow, makeWatchlist } from "#/test/factories";
 import { renderRoute } from "#/test/test-utils";
 

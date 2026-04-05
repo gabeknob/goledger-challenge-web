@@ -11,6 +11,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { DeleteEpisodeDialog } from "#/components/DeleteEpisodeDialog";
 import { DeleteSeasonDialog } from "#/components/DeleteSeasonDialog";
 import { DeleteShowDialog } from "#/components/DeleteShowDialog";
+import { DeletionTaskList } from "#/components/DeletionTaskList";
 import { EmptyState } from "#/components/EmptyState";
 import { EpisodeFormDialog } from "#/components/EpisodeFormDialog";
 import { ResponsiveActionMenu } from "#/components/ResponsiveActionMenu";
@@ -28,7 +29,7 @@ import {
 } from "#/components/ui/dropdown-menu";
 import { Skeleton } from "#/components/ui/skeleton";
 import { useEpisodes, useSeasons, useShow } from "#/hooks/useShowDetail";
-import { useShows } from "#/hooks/useShows";
+import { type ShowCascadePlan, type ShowCascadeTaskStatus, useShows } from "#/hooks/useShows";
 import { useTMDB, useTMDBEpisodeStill } from "#/hooks/useTMDB";
 import type { Episode } from "#/types/episode";
 import type { Season } from "#/types/season";
@@ -66,8 +67,13 @@ function ShowDetailPage() {
   const [deletingSeason, setDeletingSeason] = useState<Season | null>(null);
   const [editingEpisode, setEditingEpisode] = useState<Episode | null>(null);
   const [editingSeason, setEditingSeason] = useState<Season | null>(null);
+  const [isDeletingShow, setIsDeletingShow] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [showDeletePlan, setShowDeletePlan] = useState<ShowCascadePlan | null>(null);
+  const [showDeleteTaskStatuses, setShowDeleteTaskStatuses] = useState<
+    Record<string, ShowCascadeTaskStatus>
+  >({});
 
   const { data: show, isLoading: isShowLoading, isError: isShowError } = useShow(decodedShowId);
   const { imageUrl: posterUrl } = useTMDB(show?.title ?? decodedShowId, "poster");
@@ -140,6 +146,42 @@ function ShowDetailPage() {
         search={{ season: seasons[0].number }}
         replace
       />
+    );
+  }
+
+  if (isDeletingShow) {
+    return (
+      <main className="mx-auto flex min-h-[70svh] max-w-3xl flex-col items-center justify-center px-4 text-center">
+        <div className="rounded-4xl border border-border bg-card/70 px-8 py-10 shadow-sm">
+          <p className="text-xs font-semibold tracking-[0.24em] uppercase text-muted-foreground">
+            Deleting Show
+          </p>
+          <h1 className="display-title mt-4 text-3xl font-bold text-foreground">
+            Removing {show?.title ?? decodedShowId}
+          </h1>
+          <p className="mt-3 text-sm leading-7 text-muted-foreground">
+            {showDeletePlan
+              ? `We found ${showDeletePlan.tasks.length} cleanup steps for this cascade deletion.`
+              : "We're preparing everything that needs to be removed before the cascade starts."}
+            <br />
+            This can take a moment.
+          </p>
+          {showDeletePlan ? (
+            <DeletionTaskList
+              className="mt-6 max-h-[22rem] space-y-2 overflow-y-auto text-left"
+              tasks={showDeletePlan.tasks}
+              statuses={showDeleteTaskStatuses}
+              showStatusLabel
+            />
+          ) : (
+            <div className="mt-6 space-y-3">
+              <Skeleton className="h-3 w-64 bg-muted/70" />
+              <Skeleton className="h-3 w-56 bg-muted/60" />
+              <Skeleton className="h-3 w-48 bg-muted/50" />
+            </div>
+          )}
+        </div>
+      </main>
     );
   }
 
@@ -364,6 +406,26 @@ function ShowDetailPage() {
       <DeleteShowDialog
         open={isDeleteOpen}
         onOpenChange={setIsDeleteOpen}
+        onDeletingChange={deleting => {
+          setIsDeletingShow(deleting);
+
+          if (!deleting) {
+            setShowDeletePlan(null);
+            setShowDeleteTaskStatuses({});
+          }
+        }}
+        onPlanChange={plan => {
+          setShowDeletePlan(plan);
+          setShowDeleteTaskStatuses(
+            plan ? Object.fromEntries(plan.tasks.map(task => [task.id, "pending" as const])) : {},
+          );
+        }}
+        onTaskStatusChange={(taskId, status) =>
+          setShowDeleteTaskStatuses(current => ({
+            ...current,
+            [taskId]: status,
+          }))
+        }
         show={show ?? null}
         onDeleted={() =>
           navigate({

@@ -22,6 +22,10 @@ interface UpdateSeasonPayload {
 
 interface DeleteSeasonPayload {
   episodes: Episode[];
+  onTaskStatusChange?: (
+    taskId: string,
+    status: "pending" | "running" | "completed" | "failed",
+  ) => void;
   season: Season;
 }
 
@@ -65,22 +69,35 @@ async function updateSeason({ current, next }: UpdateSeasonPayload) {
   });
 }
 
-async function deleteSeason({ episodes, season }: DeleteSeasonPayload) {
-  await Promise.all(
-    episodes.map(episode =>
-      api.delete("/invoke/deleteAsset", {
+async function deleteSeason({ episodes, onTaskStatusChange, season }: DeleteSeasonPayload) {
+  for (const episode of episodes) {
+    const taskId = `episode:${episode["@key"]}`;
+    onTaskStatusChange?.(taskId, "running");
+    try {
+      await api.delete("/invoke/deleteAsset", {
         data: {
           key: buildEpisodeKey(episode),
         },
-      }),
-    ),
-  );
+      });
+      onTaskStatusChange?.(taskId, "completed");
+    } catch (error) {
+      onTaskStatusChange?.(taskId, "failed");
+      throw error;
+    }
+  }
 
-  await api.delete("/invoke/deleteAsset", {
-    data: {
-      key: buildSeasonKey(season),
-    },
-  });
+  onTaskStatusChange?.(`season:${season["@key"]}`, "running");
+  try {
+    await api.delete("/invoke/deleteAsset", {
+      data: {
+        key: buildSeasonKey(season),
+      },
+    });
+    onTaskStatusChange?.(`season:${season["@key"]}`, "completed");
+  } catch (error) {
+    onTaskStatusChange?.(`season:${season["@key"]}`, "failed");
+    throw error;
+  }
 }
 
 export function useCreateSeason() {

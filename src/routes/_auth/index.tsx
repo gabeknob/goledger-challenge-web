@@ -21,6 +21,7 @@ export const Route = createFileRoute("/_auth/")({
 const recentShowsQueryKey = ["home", "recentShows"] as const;
 const alphabeticalShowsQueryKey = ["home", "alphabeticalShows"] as const;
 const homeWatchlistsQueryKey = ["home", "watchlists"] as const;
+const HOME_ALPHABETICAL_SHOWS_LIMIT = 10;
 
 function HomePage() {
   const { data: shows = [] } = useShows();
@@ -93,7 +94,7 @@ async function fetchAlphabeticalShows(): Promise<TvShow[]> {
       selector: {
         "@assetType": "tvShows",
       },
-      limit: 24,
+      limit: HOME_ALPHABETICAL_SHOWS_LIMIT,
     },
   });
 
@@ -259,6 +260,8 @@ function HorizontalShowsSection({
   isLoading: boolean;
   shows: TvShow[];
 }) {
+  const hasMoreShows = shows.length === HOME_ALPHABETICAL_SHOWS_LIMIT;
+
   return (
     <DashboardSection
       eyebrow="TV Shows"
@@ -287,6 +290,7 @@ function HorizontalShowsSection({
             {shows.map(show => (
               <HomeShowCard key={show["@key"]} show={show} />
             ))}
+            {hasMoreShows ? <SeeMoreShowsCard /> : null}
           </div>
         </div>
       )}
@@ -448,6 +452,28 @@ function HomeShowCard({ show }: { show: TvShow }) {
         </div>
       </div>
     </Link>
+  );
+}
+
+function SeeMoreShowsCard() {
+  return (
+    <Card className="w-[11rem] shrink-0 overflow-hidden rounded-[1.5rem] border border-dashed border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+      <Link to="/shows" className="flex h-full min-h-[16.5rem] flex-col justify-between p-4">
+        <div className="space-y-2">
+          <p className="text-xs font-semibold tracking-[0.22em] uppercase text-muted-foreground">
+            More to browse
+          </p>
+          <h3 className="display-title text-2xl font-semibold text-foreground">See more</h3>
+          <p className="text-sm leading-6 text-muted-foreground">
+            Open the full catalogue to keep exploring your shows.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 text-sm font-medium text-primary">
+          View all
+          <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" />
+        </div>
+      </Link>
+    </Card>
   );
 }
 

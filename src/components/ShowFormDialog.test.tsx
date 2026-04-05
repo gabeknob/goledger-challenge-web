@@ -93,4 +93,19 @@ describe("ShowFormDialog", () => {
     expect(screen.getByText("Description is required")).toBeInTheDocument();
     expect(createMutateAsync).not.toHaveBeenCalled();
   }, 10000);
+
+  it("shows inline errors on an empty submit", async () => {
+    const user = userEvent.setup();
+
+    renderWithProviders(
+      <ShowFormDialog existingShows={[]} mode="create" open onOpenChange={vi.fn()} />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Create Show" }));
+
+    expect(await screen.findByText("Title is required")).toBeInTheDocument();
+    expect(screen.getByText("Description is required")).toBeInTheDocument();
+    expect(screen.getByLabelText("Recommended age")).toHaveValue(16);
+    expect(createMutateAsync).not.toHaveBeenCalled();
+  }, 10000);
 });

@@ -40,6 +40,19 @@ describe("DeleteShowDialog", () => {
     expect(deleteButton).toBeEnabled();
   }, 15000);
 
+  it("closes on cancel without firing the mutation", async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+    const show = makeTvShow({ title: "Ted Lasso" });
+
+    renderWithProviders(<DeleteShowDialog open onOpenChange={onOpenChange} show={show} />);
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+    expect(mutateAsync).not.toHaveBeenCalled();
+  }, 10000);
+
   it("runs the cascade and surfaces success details", async () => {
     const user = userEvent.setup();
     const show = makeTvShow({ title: "Ted Lasso" });

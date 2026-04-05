@@ -1,6 +1,13 @@
 import { clearCredentials, getCredentials, isAuthenticated, setCredentials } from "#/lib/auth";
 
 describe("auth helpers", () => {
+  it("reports unauthenticated when no credentials cookie is present", () => {
+    clearCredentials();
+
+    expect(getCredentials()).toBeUndefined();
+    expect(isAuthenticated()).toBe(false);
+  });
+
   it("stores credentials as a base64 cookie", () => {
     setCredentials("goledger", "secret");
 

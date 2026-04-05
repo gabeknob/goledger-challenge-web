@@ -22,6 +22,8 @@ const config = defineConfig({
     coverage: {
       include: ["src/**/*.{ts,tsx}"],
       exclude: [
+        "src/main.tsx",
+        "src/router.tsx",
         "src/routeTree.gen.ts",
         "src/components/ui/**",
         "src/**/*.test.{ts,tsx}",

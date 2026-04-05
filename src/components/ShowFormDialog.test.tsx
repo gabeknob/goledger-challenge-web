@@ -50,7 +50,7 @@ describe("ShowFormDialog", () => {
     expect(onOpenChange).toHaveBeenCalledWith(false);
   }, 10000);
 
-  it("locks the title in edit mode and updates the current show", async () => {
+  it("allows title changes in edit mode and updates the current show", async () => {
     const user = userEvent.setup();
     const show = makeTvShow({ title: "Ted Lasso", description: "Old description" });
 
@@ -58,8 +58,8 @@ describe("ShowFormDialog", () => {
       <ShowFormDialog existingShows={[show]} mode="edit" open onOpenChange={vi.fn()} show={show} />,
     );
 
-    expect(screen.getByLabelText("Title")).toHaveAttribute("readonly");
-
+    await user.clear(screen.getByLabelText("Title"));
+    await user.type(screen.getByLabelText("Title"), "Ted Lasso Reloaded");
     await user.clear(screen.getByLabelText("Description"));
     await user.type(screen.getByLabelText("Description"), "Updated description");
     await user.click(screen.getByRole("button", { name: "Save Changes" }));
@@ -69,8 +69,10 @@ describe("ShowFormDialog", () => {
       next: {
         description: "Updated description",
         recommendedAge: 14,
-        title: "Ted Lasso",
+        title: "Ted Lasso Reloaded",
       },
+      onPlanChange: expect.any(Function),
+      onTaskStatusChange: undefined,
     });
   });
 

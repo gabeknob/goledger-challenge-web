@@ -227,19 +227,89 @@ describe("useShows", () => {
     });
   });
 
-  it("renames a show through create-and-delete and invalidates old and new show detail queries", async () => {
-    vi.mocked(api.post).mockResolvedValue({ data: {} } as never);
-    vi.mocked(api.delete).mockResolvedValue({ data: {} } as never);
-    const invalidateQueriesSpy = vi
-      .spyOn(queryClient, "invalidateQueries")
-      .mockResolvedValue(undefined);
-    vi.spyOn(queryClient, "getQueryData").mockReturnValue([]);
-    vi.spyOn(queryClient, "getQueriesData").mockReturnValue([]);
-
+  it("renames a show by migrating dependent records and invalidates old and new show detail queries", async () => {
     const current = makeTvShow({
+      "@key": "tvShows:ted-lasso",
       description: "Old description",
       title: "Ted Lasso",
     });
+    const renamedShow = makeTvShow({
+      "@key": "tvShows:ted-lasso-reloaded",
+      title: "Ted Lasso Reloaded",
+      description: "Fresh description",
+      recommendedAge: 16,
+    });
+    const season = makeSeason({
+      "@key": "seasons:ted-lasso-1",
+      number: 1,
+      tvShow: {
+        "@assetType": "tvShows",
+        "@key": current["@key"],
+      },
+    });
+    const recreatedSeason = makeSeason({
+      "@key": "seasons:ted-lasso-reloaded-1",
+      number: 1,
+      tvShow: {
+        "@assetType": "tvShows",
+        "@key": renamedShow["@key"],
+      },
+    });
+    const episode = makeEpisode({
+      "@key": "episodes:ted-lasso-1-1",
+      episodeNumber: 1,
+      season: {
+        "@assetType": "seasons",
+        "@key": season["@key"],
+      },
+      title: "Pilot",
+    });
+    const watchlist = makeWatchlist({
+      title: "Favorites",
+      tvShows: [
+        {
+          "@assetType": "tvShows",
+          "@key": current["@key"],
+        },
+      ],
+    });
+
+    vi.mocked(api.post)
+      .mockResolvedValueOnce({
+        data: {
+          metadata: { bookmark: undefined },
+          result: [watchlist],
+        },
+      } as never)
+      .mockResolvedValueOnce({
+        data: {
+          metadata: { bookmark: undefined },
+          result: [season],
+        },
+      } as never)
+      .mockResolvedValueOnce({
+        data: {
+          metadata: { bookmark: undefined },
+          result: [episode],
+        },
+      } as never)
+      .mockResolvedValueOnce({ data: {} } as never)
+      .mockResolvedValueOnce({ data: renamedShow } as never)
+      .mockResolvedValueOnce({ data: {} } as never)
+      .mockResolvedValueOnce({
+        data: {
+          metadata: { bookmark: undefined },
+          result: [recreatedSeason],
+        },
+      } as never)
+      .mockResolvedValueOnce({ data: {} } as never);
+    vi.mocked(api.delete).mockResolvedValue({ data: {} } as never);
+    vi.mocked(api.put).mockResolvedValue({ data: {} } as never);
+    const invalidateQueriesSpy = vi
+      .spyOn(queryClient, "invalidateQueries")
+      .mockResolvedValue(undefined);
+    vi.spyOn(queryClient, "getQueryData").mockReturnValue([watchlist]);
+    vi.spyOn(queryClient, "getQueriesData").mockReturnValue([[["show", current.title], current]] as never);
 
     const { result } = renderHook(() => useUpdateShow(), {
       wrapper: createWrapper(),
@@ -255,6 +325,12 @@ describe("useShows", () => {
     });
 
     await waitFor(() => {
+      expect(api.post).toHaveBeenCalledWith("/query/readAsset", {
+        key: {
+          "@assetType": "tvShows",
+          title: "Ted Lasso Reloaded",
+        },
+      });
       expect(api.post).toHaveBeenCalledWith("/invoke/createAsset", {
         asset: [
           {
@@ -267,11 +343,71 @@ describe("useShows", () => {
       });
     });
 
+    expect(api.post).toHaveBeenCalledWith("/invoke/createAsset", {
+      asset: [
+        {
+          "@assetType": "seasons",
+          number: season.number,
+          tvShow: {
+            "@assetType": "tvShows",
+            "@key": renamedShow["@key"],
+          },
+          year: season.year,
+        },
+      ],
+    });
+    expect(api.post).toHaveBeenCalledWith("/invoke/createAsset", {
+      asset: [
+        {
+          "@assetType": "episodes",
+          season: {
+            "@assetType": "seasons",
+            "@key": recreatedSeason["@key"],
+          },
+          episodeNumber: episode.episodeNumber,
+          title: episode.title,
+          releaseDate: episode.releaseDate,
+          description: episode.description,
+          rating: episode.rating,
+        },
+      ],
+    });
+    expect(api.put).toHaveBeenCalledWith("/invoke/updateAsset", {
+      update: {
+        "@assetType": "watchlist",
+        title: watchlist.title,
+        description: watchlist.description ?? "",
+        tvShows: [
+          {
+            "@assetType": "tvShows",
+            "@key": renamedShow["@key"],
+          },
+        ],
+      },
+    });
     expect(api.delete).toHaveBeenCalledWith("/invoke/deleteAsset", {
       data: {
         key: {
           "@assetType": "tvShows",
           title: "Ted Lasso",
+        },
+      },
+    });
+    expect(api.delete).toHaveBeenCalledWith("/invoke/deleteAsset", {
+      data: {
+        key: {
+          "@assetType": "episodes",
+          season: episode.season,
+          episodeNumber: episode.episodeNumber,
+        },
+      },
+    });
+    expect(api.delete).toHaveBeenCalledWith("/invoke/deleteAsset", {
+      data: {
+        key: {
+          "@assetType": "seasons",
+          number: season.number,
+          tvShow: season.tvShow,
         },
       },
     });
@@ -282,6 +418,9 @@ describe("useShows", () => {
       });
       expect(invalidateQueriesSpy).toHaveBeenCalledWith({
         queryKey: ["show", "Ted Lasso Reloaded"],
+      });
+      expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+        queryKey: ["watchlists", "Favorites"],
       });
       expect(invalidateQueriesSpy).toHaveBeenCalledWith({
         queryKey: ["shows", "browse"],

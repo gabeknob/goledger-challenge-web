@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   Bookmark01Icon,
   Cancel01Icon,
@@ -33,6 +33,7 @@ export const Route = createFileRoute("/_auth/watchlists/")({
 type SortOrder = "az" | "za";
 
 export function WatchlistsPage() {
+  const navigate = useNavigate();
   const { data: shows = [] } = useShows();
   const { data: watchlists, isError, isLoading } = useWatchlists();
   const [creatingWatchlist, setCreatingWatchlist] = useState(false);
@@ -181,6 +182,13 @@ export function WatchlistsPage() {
           if (!open) {
             setEditingWatchlist(null);
           }
+        }}
+        onSubmitted={title => {
+          setEditingWatchlist(null);
+          void navigate({
+            to: "/watchlists/$title",
+            params: { title },
+          });
         }}
         open={Boolean(editingWatchlist)}
         watchlist={editingWatchlist}

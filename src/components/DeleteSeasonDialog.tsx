@@ -11,7 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "#/components/ui/alert-dialog";
-import { DeletionTaskList, type DeletionTaskStatus } from "#/components/DeletionTaskList";
+import { TaskList, type TaskStatus } from "#/components/DeletionTaskList";
 import { useDeleteSeason } from "#/hooks/useSeasons";
 import { getApiErrorMessage } from "#/lib/api-errors";
 import type { Episode } from "#/types/episode";
@@ -33,7 +33,7 @@ export function DeleteSeasonDialog({
   season,
 }: DeleteSeasonDialogProps) {
   const deleteSeason = useDeleteSeason();
-  const [taskStatuses, setTaskStatuses] = useState<Record<string, DeletionTaskStatus>>({});
+  const [taskStatuses, setTaskStatuses] = useState<Record<string, TaskStatus>>({});
   const cascadeTasks = useMemo(
     () => [
       ...episodes.map(episode => ({
@@ -99,7 +99,7 @@ export function DeleteSeasonDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         {cascadeTasks.length > 0 ? (
-          <DeletionTaskList className="space-y-2" tasks={cascadeTasks} statuses={taskStatuses} />
+          <TaskList className="space-y-2" tasks={cascadeTasks} statuses={taskStatuses} />
         ) : null}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={deleteSeason.isPending}>Cancel</AlertDialogCancel>

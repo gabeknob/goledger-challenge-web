@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { act, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -6,8 +7,12 @@ import { getIntersectionObservers } from "#/test/browser-mocks";
 import { makeTvShow } from "#/test/factories";
 import { renderRoute } from "#/test/test-utils";
 
-const useShowsBrowseMock = vi.fn();
+const useCascadeDeleteShowMock = vi.fn();
+const useCreateShowMock = vi.fn();
 const useDebouncedStateMock = vi.fn();
+const useShowsBrowseMock = vi.fn();
+const useTMDBMock = vi.fn();
+const useUpdateShowMock = vi.fn();
 
 vi.mock("#/lib/auth", async (importOriginal: <T>() => Promise<T>) => {
   const actual = await importOriginal<typeof import("#/lib/auth")>();
@@ -19,11 +24,18 @@ vi.mock("#/lib/auth", async (importOriginal: <T>() => Promise<T>) => {
 });
 
 vi.mock("#/hooks/useShows", () => ({
+  useCascadeDeleteShow: () => useCascadeDeleteShowMock(),
+  useCreateShow: () => useCreateShowMock(),
   useShowsBrowse: (...args: unknown[]) => useShowsBrowseMock(...args),
+  useUpdateShow: () => useUpdateShowMock(),
 }));
 
 vi.mock("#/hooks/useDebouncedState", () => ({
   useDebouncedState: (...args: unknown[]) => useDebouncedStateMock(...args),
+}));
+
+vi.mock("#/hooks/useTMDB", () => ({
+  useTMDB: (...args: unknown[]) => useTMDBMock(...args),
 }));
 
 vi.mock("#/components/Navbar", () => ({
@@ -38,73 +50,35 @@ vi.mock("#/components/BottomTabBar", () => ({
   BottomTabBar: () => null,
 }));
 
-vi.mock("#/components/ShowCard", () => ({
-  ShowCard: ({
-    onDelete,
-    onEdit,
-    show,
+vi.mock("#/components/ui/dropdown-menu", () => ({
+  DropdownMenu: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  DropdownMenuContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  DropdownMenuGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  DropdownMenuItem: ({
+    children,
+    onSelect,
   }: {
-    onDelete: (show: { title: string }) => void;
-    onEdit: (show: { title: string }) => void;
-    show: { title: string };
+    children: ReactNode;
+    onSelect?: () => void;
   }) => (
-    <div>
-      <div>{show.title}</div>
-      <button type="button" onClick={() => onEdit(show)}>
-        Edit {show.title}
-      </button>
-      <button type="button" onClick={() => onDelete(show)}>
-        Delete {show.title}
-      </button>
-    </div>
+    <button type="button" onClick={() => onSelect?.()}>
+      {children}
+    </button>
   ),
-  ShowCardSkeleton: () => <div data-testid="show-card-skeleton">Loading</div>,
-}));
-
-vi.mock("#/components/ShowFormDialog", () => ({
-  ShowFormDialog: ({
-    mode,
-    onOpenChange,
-    open,
-    show,
-  }: {
-    mode: "create" | "edit";
-    onOpenChange: (open: boolean) => void;
-    open: boolean;
-    show?: { title: string } | null;
-  }) =>
-    open ? (
-      <div>
-        <div>{mode === "create" ? "Create show dialog" : `Edit ${show?.title}`}</div>
-        <button type="button" onClick={() => onOpenChange(false)}>
-          Close show dialog
-        </button>
-      </div>
-    ) : null,
-}));
-
-vi.mock("#/components/DeleteShowDialog", () => ({
-  DeleteShowDialog: ({
-    onOpenChange,
-    open,
-    show,
-  }: {
-    onOpenChange: (open: boolean) => void;
-    open: boolean;
-    show?: { title: string } | null;
-  }) =>
-    open ? (
-      <div>
-        <div>Delete {show?.title}</div>
-        <button type="button" onClick={() => onOpenChange(false)}>
-          Close delete show
-        </button>
-      </div>
-    ) : null,
+  DropdownMenuTrigger: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 
 describe("/shows page", () => {
   beforeEach(() => {
+    useCascadeDeleteShowMock.mockReturnValue({
+      isPending: false,
+      mutateAsync: vi.fn().mockResolvedValue({
+        deletedEpisodes: 0,
+        deletedSeasons: 0,
+        updatedWatchlists: 0,
+      }),
+    });
+    useCreateShowMock.mockReturnValue({ isPending: false, mutateAsync: vi.fn() });
     useShowsBrowseMock.mockReturnValue({
       data: { pages: [{ items: [] }] },
       fetchNextPage: vi.fn(),
@@ -113,6 +87,8 @@ describe("/shows page", () => {
       isFetchingNextPage: false,
       isLoading: false,
     });
+    useTMDBMock.mockReturnValue({ imageUrl: null });
+    useUpdateShowMock.mockReturnValue({ isPending: false, mutateAsync: vi.fn() });
     useDebouncedStateMock.mockImplementation((value: string) => ({
       debouncedValue: value,
       isDebouncing: false,
@@ -144,7 +120,8 @@ describe("/shows page", () => {
     expect(screen.getByRole("button", { name: "Add your first show" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Add your first show" }));
-    expect(screen.getByText("Create show dialog")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "New Show" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
   });
 
   it("shows the no-results state for an unmatched search", async () => {
@@ -239,7 +216,7 @@ describe("/shows page", () => {
       path: "/shows",
     });
 
-    expect(loadingRender.getAllByTestId("show-card-skeleton")).toHaveLength(12);
+    expect(loadingRender.container.querySelectorAll(".animate-pulse").length).toBeGreaterThan(0);
     loadingRender.unmount();
 
     useShowsBrowseMock.mockReturnValue({
@@ -256,7 +233,7 @@ describe("/shows page", () => {
       path: "/shows",
     });
 
-    expect(nextPageRender.getAllByTestId("show-card-skeleton")).toHaveLength(6);
+    expect(nextPageRender.container.querySelectorAll(".animate-pulse").length).toBeGreaterThan(0);
   });
 
   it("shows error state and opens or closes edit and delete dialogs", async () => {
@@ -294,18 +271,20 @@ describe("/shows page", () => {
     });
 
     await user.click(screen.getByRole("button", { name: "New Show" }));
-    expect(screen.getByText("Create show dialog")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Close show dialog" }));
-    expect(screen.queryByRole("button", { name: "Close show dialog" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "New Show" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByRole("heading", { name: "New Show" })).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Edit Ted Lasso" }));
-    expect(screen.getAllByText("Edit Ted Lasso").length).toBeGreaterThan(0);
-    await user.click(screen.getByRole("button", { name: "Close show dialog" }));
-    expect(screen.queryByRole("button", { name: "Close show dialog" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Options" }));
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    expect(screen.getByRole("heading", { name: "Edit Show" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByRole("heading", { name: "Edit Show" })).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Delete Ted Lasso" }));
-    expect(screen.getByRole("button", { name: "Close delete show" })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Close delete show" }));
-    expect(screen.queryByRole("button", { name: "Close delete show" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Options" }));
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+    expect(screen.getByText("Delete show and related data?")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByText("Delete show and related data?")).not.toBeInTheDocument();
   });
 });

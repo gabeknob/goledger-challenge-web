@@ -1,12 +1,16 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ReactNode } from "react";
 
 import { makeTvShow, makeWatchlist } from "#/test/factories";
 import { renderAppRoute } from "#/test/test-utils";
 
 const toastSuccessMock = vi.fn();
 const toastErrorMock = vi.fn();
+const createWatchlistMutateAsyncMock = vi.fn();
+const deleteWatchlistMutateAsyncMock = vi.fn();
 const useShowsMock = vi.fn();
+const useTMDBMock = vi.fn();
 const useWatchlistsMock = vi.fn();
 const useWatchlistMock = vi.fn();
 const updateWatchlistMutateAsyncMock = vi.fn();
@@ -32,8 +36,21 @@ vi.mock("#/hooks/useShows", () => ({
   useShows: () => useShowsMock(),
 }));
 
+vi.mock("#/hooks/useTMDB", () => ({
+  useTMDB: (...args: unknown[]) => useTMDBMock(...args),
+}));
+
 vi.mock("#/hooks/useWatchlists", () => ({
+  useCreateWatchlist: () => ({
+    isPending: false,
+    mutateAsync: (...args: unknown[]) => createWatchlistMutateAsyncMock(...args),
+  }),
+  useDeleteWatchlist: () => ({
+    isPending: false,
+    mutateAsync: (...args: unknown[]) => deleteWatchlistMutateAsyncMock(...args),
+  }),
   useUpdateWatchlist: () => ({
+    isPending: false,
     mutateAsync: (...args: unknown[]) => updateWatchlistMutateAsyncMock(...args),
   }),
   useWatchlist: (title: string) => useWatchlistMock(title),
@@ -52,80 +69,50 @@ vi.mock("#/components/BottomTabBar", () => ({
   BottomTabBar: () => null,
 }));
 
-vi.mock("#/components/WatchlistShowCard", () => ({
-  WatchlistShowCard: ({
-    onRemove,
-    show,
+vi.mock("#/components/ui/dropdown-menu", () => ({
+  DropdownMenu: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  DropdownMenuContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  DropdownMenuGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  DropdownMenuItem: ({
+    children,
+    onSelect,
   }: {
-    onRemove: (show: { title: string }) => void;
-    show: { title: string };
+    children: ReactNode;
+    onSelect?: (event: { preventDefault: () => void }) => void;
   }) => (
-    <div>
-      <div>{show.title}</div>
-      <button type="button" onClick={() => onRemove(show)}>
-        Remove {show.title}
-      </button>
-    </div>
+    <button type="button" onClick={() => onSelect?.({ preventDefault: () => undefined })}>
+      {children}
+    </button>
   ),
+  DropdownMenuTrigger: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 
-vi.mock("#/components/WatchlistAddShowsDialog", () => ({
-  WatchlistAddShowsDialog: ({ open }: { open: boolean }) =>
-    open ? <div>Add shows dialog</div> : null,
-}));
-
-vi.mock("#/components/WatchlistFormDialog", () => ({
-  WatchlistFormDialog: ({
-    onSubmitted,
-    open,
-    watchlist,
-  }: {
-    onSubmitted?: (title: string) => void;
-    open: boolean;
-    watchlist?: { title: string } | null;
-  }) =>
-    open ? (
-      <div>
-        <div>{`Edit ${watchlist?.title}`}</div>
-        <button type="button" onClick={() => onSubmitted?.("Renamed Watchlist")}>
-          Submit watchlist form
-        </button>
-      </div>
-    ) : null,
-}));
-
-vi.mock("#/components/DeleteWatchlistDialog", () => ({
-  DeleteWatchlistDialog: ({
-    onDeleted,
-    open,
-    watchlist,
-  }: {
-    onDeleted?: () => void;
-    open: boolean;
-    watchlist?: { title: string } | null;
-  }) =>
-    open ? (
-      <div>
-        <div>{`Delete ${watchlist?.title}`}</div>
-        <button type="button" onClick={() => onDeleted?.()}>
-          Confirm delete
-        </button>
-      </div>
-    ) : null,
+vi.mock("#/components/ui/sheet", () => ({
+  Sheet: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SheetContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SheetDescription: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SheetHeader: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SheetTitle: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SheetTrigger: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 
 describe("watchlist detail route", () => {
   beforeEach(() => {
     toastSuccessMock.mockReset();
     toastErrorMock.mockReset();
+    createWatchlistMutateAsyncMock.mockReset();
+    deleteWatchlistMutateAsyncMock.mockReset();
     updateWatchlistMutateAsyncMock.mockReset();
     useShowsMock.mockReturnValue({ data: [] });
+    useTMDBMock.mockReturnValue({ imageUrl: null });
     useWatchlistsMock.mockReturnValue({ data: [] });
     useWatchlistMock.mockReturnValue({
       data: undefined,
       isError: false,
       isLoading: false,
     });
+    createWatchlistMutateAsyncMock.mockResolvedValue(undefined);
+    deleteWatchlistMutateAsyncMock.mockResolvedValue(undefined);
   });
 
   it("renders the not-found state when the watchlist query fails", async () => {
@@ -165,7 +152,7 @@ describe("watchlist detail route", () => {
 
     await user.click(screen.getAllByRole("button", { name: "Add Show" })[0]);
 
-    expect(screen.getByText("Add shows dialog")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Add Shows" })).toBeInTheDocument();
   }, 15000);
 
   it("renames the watchlist, removes shows, and navigates after delete", async () => {
@@ -181,7 +168,7 @@ describe("watchlist detail route", () => {
     });
 
     useShowsMock.mockReturnValue({ data: [show] });
-    useWatchlistsMock.mockReturnValue({ data: [originalWatchlist, renamedWatchlist] });
+    useWatchlistsMock.mockReturnValue({ data: [originalWatchlist] });
     useWatchlistMock.mockImplementation((title: string) => {
       if (title === "Renamed Watchlist") {
         return {
@@ -206,12 +193,15 @@ describe("watchlist detail route", () => {
     expect(screen.getByText("Ted Lasso")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Edit Watchlist" }));
-    expect(screen.getByText("Edit Weekend Picks")).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Submit watchlist form" }));
+    expect(screen.getByRole("heading", { name: "Edit Watchlist" })).toBeInTheDocument();
+    const titleInput = screen.getByLabelText("Title");
+    await user.clear(titleInput);
+    await user.type(titleInput, "Renamed Watchlist");
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
     expect(await screen.findByRole("heading", { name: "Renamed Watchlist" })).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Remove Ted Lasso" }));
+    await user.click(screen.getAllByRole("button", { name: "Show actions" })[0]!);
+    await user.click(screen.getAllByRole("button", { name: "Remove from watchlist" })[1]!);
 
     await waitFor(() => {
       expect(updateWatchlistMutateAsyncMock).toHaveBeenCalledWith({
@@ -228,9 +218,9 @@ describe("watchlist detail route", () => {
     );
 
     await user.click(screen.getByRole("button", { name: "Delete Watchlist" }));
-    expect(screen.getByText("Delete Renamed Watchlist")).toBeInTheDocument();
+    expect(screen.getByText("Delete watchlist?")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Confirm delete" }));
+    await user.click(screen.getByRole("button", { name: "Delete Watchlist" }));
     expect(await screen.findByRole("heading", { name: "Watchlists" })).toBeInTheDocument();
   }, 15000);
 });

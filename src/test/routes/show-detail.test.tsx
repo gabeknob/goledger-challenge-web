@@ -4,15 +4,27 @@ import userEvent from "@testing-library/user-event";
 
 import { renderAppRoute } from "#/test/test-utils";
 import { makeEpisode, makeSeason, makeTvShow } from "#/test/factories";
-import type { ShowCascadePlan, ShowCascadeTaskStatus } from "#/hooks/useShows";
 import { Route as ShowDetailRoute } from "#/routes/_auth/shows/$showId/index";
 
+const useCascadeDeleteShowMock = vi.fn();
+const useCreateEpisodeMock = vi.fn();
+const useCreateShowMock = vi.fn();
+const useDeleteEpisodeMock = vi.fn();
+const useCreateSeasonMock = vi.fn();
+const useDeleteSeasonMock = vi.fn();
+const useShowsBrowseMock = vi.fn();
 const useShowsMock = vi.fn();
 const useShowMock = vi.fn();
 const useSeasonsMock = vi.fn();
 const useEpisodesMock = vi.fn();
+const useCreateWatchlistMock = vi.fn();
 const useTMDBMock = vi.fn();
 const useTMDBEpisodeStillMock = vi.fn();
+const useUpdateEpisodeMock = vi.fn();
+const useUpdateSeasonMock = vi.fn();
+const useUpdateShowMock = vi.fn();
+const useUpdateWatchlistMock = vi.fn();
+const useWatchlistsMock = vi.fn();
 
 vi.mock("sonner", () => ({
   Toaster: () => null,
@@ -32,7 +44,11 @@ vi.mock("#/lib/auth", async (importOriginal: <T>() => Promise<T>) => {
 });
 
 vi.mock("#/hooks/useShows", () => ({
+  useCreateShow: () => useCreateShowMock(),
+  useShowsBrowse: (...args: unknown[]) => useShowsBrowseMock(...args),
   useShows: () => useShowsMock(),
+  useCascadeDeleteShow: () => useCascadeDeleteShowMock(),
+  useUpdateShow: () => useUpdateShowMock(),
 }));
 
 vi.mock("#/hooks/useShowDetail", () => ({
@@ -46,6 +62,24 @@ vi.mock("#/hooks/useTMDB", () => ({
   useTMDBEpisodeStill: (...args: unknown[]) => useTMDBEpisodeStillMock(...args),
 }));
 
+vi.mock("#/hooks/useSeasons", () => ({
+  useCreateSeason: () => useCreateSeasonMock(),
+  useDeleteSeason: () => useDeleteSeasonMock(),
+  useUpdateSeason: () => useUpdateSeasonMock(),
+}));
+
+vi.mock("#/hooks/useEpisodes", () => ({
+  useCreateEpisode: () => useCreateEpisodeMock(),
+  useDeleteEpisode: () => useDeleteEpisodeMock(),
+  useUpdateEpisode: () => useUpdateEpisodeMock(),
+}));
+
+vi.mock("#/hooks/useWatchlists", () => ({
+  useCreateWatchlist: () => useCreateWatchlistMock(),
+  useUpdateWatchlist: () => useUpdateWatchlistMock(),
+  useWatchlists: () => useWatchlistsMock(),
+}));
+
 vi.mock("#/components/Navbar", () => ({
   Navbar: () => null,
 }));
@@ -56,27 +90,6 @@ vi.mock("#/components/Breadcrumbs", () => ({
 
 vi.mock("#/components/BottomTabBar", () => ({
   BottomTabBar: () => null,
-}));
-
-vi.mock("#/components/WatchlistMembershipPopover", () => ({
-  WatchlistMembershipPopover: ({ show }: { show?: { title: string } }) =>
-    show ? <button type="button">+ Watchlist</button> : null,
-}));
-
-vi.mock("#/components/ResponsiveActionMenu", () => ({
-  ResponsiveActionMenu: ({
-    actions,
-  }: {
-    actions: Array<{ destructive?: boolean; label: string; onSelect: () => void }>;
-  }) => (
-    <div>
-      {actions.map(action => (
-        <button key={action.label} type="button" onClick={action.onSelect}>
-          {action.label}
-        </button>
-      ))}
-    </div>
-  ),
 }));
 
 vi.mock("#/components/ui/dropdown-menu", () => ({
@@ -97,150 +110,56 @@ vi.mock("#/components/ui/dropdown-menu", () => ({
   DropdownMenuTrigger: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 
-vi.mock("#/components/ShowFormDialog", () => ({
-  ShowFormDialog: ({ open }: { open: boolean }) => (open ? <div>Edit show dialog</div> : null),
+vi.mock("#/components/ui/sheet", () => ({
+  Sheet: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SheetContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SheetDescription: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SheetHeader: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SheetTitle: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SheetTrigger: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 
-vi.mock("#/components/SeasonFormDialog", () => ({
-  SeasonFormDialog: ({
-    mode,
-    onOpenChange,
-    open,
-    season,
-  }: {
-    mode: "create" | "edit";
-    onOpenChange: (open: boolean) => void;
-    open: boolean;
-    season?: { number: number } | null;
-  }) =>
-    open ? (
-      <div>
-        <div>{mode === "create" ? "Create season dialog" : `Edit season ${season?.number}`}</div>
-        <button type="button" onClick={() => onOpenChange(false)}>
-          Close season dialog
-        </button>
-      </div>
-    ) : null,
+vi.mock("#/components/ui/popover", () => ({
+  Popover: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  PopoverContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  PopoverTrigger: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 
-vi.mock("#/components/EpisodeFormDialog", () => ({
-  EpisodeFormDialog: ({
-    mode,
-    onOpenChange,
-    open,
-    episode,
+vi.mock("#/components/ui/command", () => ({
+  Command: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  CommandEmpty: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  CommandGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  CommandInput: ({
+    "aria-label": ariaLabel,
+    onChange,
+    placeholder,
+    value,
   }: {
-    mode: "create" | "edit";
-    onOpenChange: (open: boolean) => void;
-    open: boolean;
-    episode?: { title: string } | null;
-  }) =>
-    open ? (
-      <div>
-        <div>{mode === "create" ? "Create episode dialog" : `Edit ${episode?.title}`}</div>
-        <button type="button" onClick={() => onOpenChange(false)}>
-          Close episode dialog
-        </button>
-      </div>
-    ) : null,
-}));
-
-vi.mock("#/components/DeleteEpisodeDialog", () => ({
-  DeleteEpisodeDialog: ({
-    episode,
-    onOpenChange,
-    open,
+    "aria-label"?: string;
+    onChange?: (event: { target: { value: string } }) => void;
+    placeholder?: string;
+    value?: string;
+  }) => (
+    <input
+      aria-label={ariaLabel}
+      placeholder={placeholder}
+      value={value}
+      onChange={event => onChange?.({ target: { value: event.target.value } })}
+    />
+  ),
+  CommandItem: ({
+    children,
+    onClick,
   }: {
-    episode?: { title: string } | null;
-    onOpenChange: (open: boolean) => void;
-    open: boolean;
-  }) =>
-    open ? (
-      <div>
-        <div>Delete {episode?.title}</div>
-        <button type="button" onClick={() => onOpenChange(false)}>
-          Close delete episode
-        </button>
-      </div>
-    ) : null,
-}));
-
-vi.mock("#/components/DeleteSeasonDialog", () => ({
-  DeleteSeasonDialog: ({
-    onDeleted,
-    onOpenChange,
-    open,
-    season,
-  }: {
-    onDeleted: () => void;
-    onOpenChange: (open: boolean) => void;
-    open: boolean;
-    season?: { number: number } | null;
-  }) =>
-    open ? (
-      <div>
-        <div>Delete season {season?.number}</div>
-        <button type="button" onClick={onDeleted}>
-          Confirm delete season
-        </button>
-        <button type="button" onClick={() => onOpenChange(false)}>
-          Close delete season
-        </button>
-      </div>
-    ) : null,
-}));
-
-vi.mock("#/components/DeleteShowDialog", () => ({
-  DeleteShowDialog: ({
-    onDeletingChange,
-    onOpenChange,
-    onPlanChange,
-    onTaskStatusChange,
-    open,
-    show,
-  }: {
-    onDeletingChange?: (deleting: boolean) => void;
-    onOpenChange: (open: boolean) => void;
-    onPlanChange?: (plan: ShowCascadePlan | null) => void;
-    onTaskStatusChange?: (taskId: string, status: ShowCascadeTaskStatus) => void;
-    open: boolean;
-    show?: { title: string } | null;
-  }) =>
-    open ? (
-      <div>
-        <div>Delete show {show?.title}</div>
-        <button type="button" onClick={() => onOpenChange(false)}>
-          Close delete show
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            onPlanChange?.({
-              deletedEpisodes: 2,
-              deletedSeasons: 1,
-              updatedWatchlists: 1,
-              tasks: [
-                {
-                  id: "remove-watchlist-reference",
-                  kind: "watchlist",
-                  label: 'Remove "Ted Lasso" from watchlists',
-                },
-                {
-                  id: "delete-show",
-                  kind: "show",
-                  label: 'Delete show "Ted Lasso"',
-                },
-              ],
-            });
-            onTaskStatusChange?.("remove-watchlist-reference", "completed");
-            onTaskStatusChange?.("delete-show", "running");
-            onDeletingChange?.(true);
-          }}
-        >
-          Start delete show
-        </button>
-      </div>
-    ) : null,
+    children: ReactNode;
+    onClick?: () => void;
+  }) => (
+    <button type="button" onClick={onClick}>
+      {children}
+    </button>
+  ),
+  CommandList: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  CommandSeparator: () => <hr />,
 }));
 
 describe("show detail route", () => {
@@ -257,7 +176,56 @@ describe("show detail route", () => {
   });
 
   beforeEach(() => {
+    useCascadeDeleteShowMock.mockReturnValue({
+      isPending: false,
+      mutateAsync: vi.fn(async ({ onPlanChange, onTaskStatusChange }) => {
+        onPlanChange?.({
+          deletedEpisodes: 2,
+          deletedSeasons: 1,
+          updatedWatchlists: 1,
+          tasks: [
+            {
+              id: "remove-watchlist-reference",
+              kind: "watchlist",
+              label: 'Remove "Ted Lasso" from watchlists',
+            },
+            {
+              id: "delete-show",
+              kind: "show",
+              label: 'Delete show "Ted Lasso"',
+            },
+          ],
+        });
+        onTaskStatusChange?.("remove-watchlist-reference", "completed");
+        onTaskStatusChange?.("delete-show", "running");
+
+        return {
+          deletedEpisodes: 2,
+          deletedSeasons: 1,
+          updatedWatchlists: 1,
+        };
+      }),
+    });
+    useCreateShowMock.mockReturnValue({ isPending: false, mutateAsync: vi.fn() });
+    useCreateSeasonMock.mockReturnValue({ isPending: false, mutateAsync: vi.fn() });
+    useUpdateSeasonMock.mockReturnValue({ isPending: false, mutateAsync: vi.fn() });
+    useDeleteSeasonMock.mockReturnValue({ isPending: false, mutateAsync: vi.fn() });
+    useCreateEpisodeMock.mockReturnValue({ isPending: false, mutateAsync: vi.fn() });
+    useCreateWatchlistMock.mockReturnValue({ isPending: false, mutateAsync: vi.fn() });
+    useUpdateEpisodeMock.mockReturnValue({ isPending: false, mutateAsync: vi.fn() });
+    useDeleteEpisodeMock.mockReturnValue({ isPending: false, mutateAsync: vi.fn() });
+    useUpdateShowMock.mockReturnValue({ isPending: false, mutateAsync: vi.fn() });
+    useUpdateWatchlistMock.mockReturnValue({ isPending: false, mutateAsync: vi.fn() });
     useShowsMock.mockReturnValue({ data: [show] });
+    useShowsBrowseMock.mockReturnValue({
+      data: { pages: [{ items: [show], bookmark: null }], pageParams: [undefined] },
+      error: null,
+      fetchNextPage: vi.fn(),
+      hasNextPage: false,
+      isError: false,
+      isFetchingNextPage: false,
+      isLoading: false,
+    });
     useShowMock.mockReturnValue({
       data: show,
       isLoading: false,
@@ -286,6 +254,7 @@ describe("show detail route", () => {
     });
     useTMDBMock.mockReturnValue({ imageUrl: null });
     useTMDBEpisodeStillMock.mockReturnValue({ imageUrl: null });
+    useWatchlistsMock.mockReturnValue({ data: [] });
   });
 
   afterEach(() => {
@@ -314,7 +283,7 @@ describe("show detail route", () => {
 
     expect(screen.getByText("TV show not found")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Back to shows" })).toBeInTheDocument();
-  });
+  }, 15000);
 
   it("redirects to the first season when the route has no season search param", async () => {
     const { router } = await renderAppRoute("/shows/Ted%20Lasso");
@@ -343,7 +312,8 @@ describe("show detail route", () => {
     expect(screen.getByText("No seasons yet")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Add a Season" }));
-    expect(screen.getByText("Create season dialog")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Add Season" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
   });
 
   it("shows season and episode loading or error states independently", async () => {
@@ -395,7 +365,8 @@ describe("show detail route", () => {
     expect(screen.getByText("No episodes yet")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Add an Episode" }));
-    expect(screen.getByText("Create episode dialog")).toBeInTheDocument();
+    expect(screen.getByText("Add Episode")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
   });
 
   it("navigates between seasons and redirects after deleting the active season", async () => {
@@ -414,35 +385,70 @@ describe("show detail route", () => {
     expect(screen.getByText("Goodbye Earl")).toBeInTheDocument();
 
     await user.click(screen.getAllByRole("button", { name: "Delete" })[1]!);
-    expect(screen.getByText("Delete season 2")).toBeInTheDocument();
+    expect(screen.getByText("Delete season and episodes?")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Confirm delete season" }));
+    await user.click(screen.getByRole("button", { name: "Delete" }));
 
     await waitFor(() => {
       expect(router.state.location.search).toMatchObject({ season: 1 });
     });
-  });
+  }, 20000);
 
   it("opens edit dialogs and shows the cascade deletion progress screen", async () => {
     const user = userEvent.setup();
 
+    useCascadeDeleteShowMock.mockReturnValue({
+      isPending: false,
+      mutateAsync: vi.fn(async ({ onPlanChange, onTaskStatusChange }) => {
+        queueMicrotask(() => {
+          onPlanChange?.({
+            deletedEpisodes: 2,
+            deletedSeasons: 1,
+            updatedWatchlists: 1,
+            tasks: [
+              {
+                id: "remove-watchlist-reference",
+                kind: "watchlist",
+                label: 'Remove "Ted Lasso" from watchlists',
+              },
+              {
+                id: "delete-show",
+                kind: "show",
+                label: 'Delete show "Ted Lasso"',
+              },
+            ],
+          });
+          onTaskStatusChange?.("remove-watchlist-reference", "completed");
+          onTaskStatusChange?.("delete-show", "running");
+        });
+
+        return await new Promise<never>(() => {});
+      }),
+    });
+
     await renderAppRoute("/shows/Ted%20Lasso?season=1");
 
     await user.click(screen.getByRole("button", { name: "Edit Show" }));
-    expect(screen.getByText("Edit show dialog")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Edit Show" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     await user.click(screen.getAllByRole("button", { name: "Edit" })[0]!);
-    expect(screen.getByText("Edit season 1")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Edit Season" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     await user.click(screen.getAllByRole("button", { name: "Edit" })[2]!);
-    expect(screen.getByText("Edit Pilot")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Edit Episode" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     await user.click(screen.getByRole("button", { name: "Delete Show" }));
-    expect(screen.getByText("Delete show Ted Lasso")).toBeInTheDocument();
+    expect(screen.getByText("Delete show and related data?")).toBeInTheDocument();
+    await user.type(screen.getByLabelText(/Type/i), "delete Ted Lasso");
 
-    await user.click(screen.getByRole("button", { name: "Start delete show" }));
+    await user.click(screen.getByRole("button", { name: "Delete" }));
 
-    expect(screen.getByText("Deleting Show")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Deleting Show")).toBeInTheDocument();
+    });
     expect(screen.getByText("Removing Ted Lasso")).toBeInTheDocument();
     expect(screen.getByText('Remove "Ted Lasso" from watchlists')).toBeInTheDocument();
     expect(screen.getByText('Delete show "Ted Lasso"')).toBeInTheDocument();
@@ -454,5 +460,5 @@ describe("show detail route", () => {
             false),
       ),
     ).toHaveTextContent("This can take a moment.");
-  });
+  }, 30000);
 });

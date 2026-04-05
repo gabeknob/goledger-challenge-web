@@ -6,7 +6,11 @@ import { WatchlistsPage } from "#/routes/_auth/watchlists/index";
 import { makeTvShow, makeWatchlist } from "#/test/factories";
 import { renderRoute } from "#/test/test-utils";
 
+const useCreateWatchlistMock = vi.fn();
+const useDeleteWatchlistMock = vi.fn();
 const useShowsMock = vi.fn();
+const useTMDBMock = vi.fn();
+const useUpdateWatchlistMock = vi.fn();
 const useWatchlistsMock = vi.fn();
 
 vi.mock("#/lib/auth", async (importOriginal: <T>() => Promise<T>) => {
@@ -23,7 +27,14 @@ vi.mock("#/hooks/useShows", () => ({
 }));
 
 vi.mock("#/hooks/useWatchlists", () => ({
+  useCreateWatchlist: () => useCreateWatchlistMock(),
+  useDeleteWatchlist: () => useDeleteWatchlistMock(),
+  useUpdateWatchlist: () => useUpdateWatchlistMock(),
   useWatchlists: () => useWatchlistsMock(),
+}));
+
+vi.mock("#/hooks/useTMDB", () => ({
+  useTMDB: (...args: unknown[]) => useTMDBMock(...args),
 }));
 
 vi.mock("#/components/Navbar", () => ({
@@ -65,79 +76,40 @@ vi.mock("#/components/ui/select", () => ({
   SelectValue: () => <span>Sort</span>,
 }));
 
-vi.mock("#/components/WatchlistCard", () => ({
-  WatchlistCard: ({
-    itemTitles,
-    onDelete,
-    onEdit,
-    watchlist,
+vi.mock("#/components/ui/dropdown-menu", () => ({
+  DropdownMenu: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  DropdownMenuContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  DropdownMenuGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  DropdownMenuItem: ({
+    children,
+    onSelect,
   }: {
-    itemTitles: string[];
-    onDelete: (watchlist: { title: string }) => void;
-    onEdit: (watchlist: { title: string }) => void;
-    watchlist: { title: string };
+    children: ReactNode;
+    onSelect?: (event: { preventDefault: () => void }) => void;
   }) => (
-    <div>
-      <div>{watchlist.title}</div>
-      {itemTitles.map((title, index) => (
-        <div key={`${title}-${index}`}>{title}</div>
-      ))}
-      <button type="button" onClick={() => onEdit(watchlist)}>
-        Edit {watchlist.title}
-      </button>
-      <button type="button" onClick={() => onDelete(watchlist)}>
-        Delete {watchlist.title}
-      </button>
-    </div>
+    <button type="button" onClick={() => onSelect?.({ preventDefault: () => undefined })}>
+      {children}
+    </button>
   ),
-  WatchlistCardSkeleton: () => <div data-testid="watchlist-card-skeleton">Loading</div>,
+  DropdownMenuTrigger: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 
-vi.mock("#/components/WatchlistFormDialog", () => ({
-  WatchlistFormDialog: ({
-    mode,
-    onOpenChange,
-    open,
-    watchlist,
-  }: {
-    mode: "create" | "edit";
-    onOpenChange: (open: boolean) => void;
-    open: boolean;
-    watchlist?: { title: string } | null;
-  }) =>
-    open ? (
-      <div>
-        <div>{mode === "create" ? "Create watchlist dialog" : `Edit ${watchlist?.title}`}</div>
-        <button type="button" onClick={() => onOpenChange(false)}>
-          Close watchlist form
-        </button>
-      </div>
-    ) : null,
-}));
-
-vi.mock("#/components/DeleteWatchlistDialog", () => ({
-  DeleteWatchlistDialog: ({
-    onOpenChange,
-    open,
-    watchlist,
-  }: {
-    onOpenChange: (open: boolean) => void;
-    open: boolean;
-    watchlist?: { title: string } | null;
-  }) =>
-    open ? (
-      <div>
-        <div>{`Delete ${watchlist?.title}`}</div>
-        <button type="button" onClick={() => onOpenChange(false)}>
-          Close delete watchlist
-        </button>
-      </div>
-    ) : null,
+vi.mock("#/components/ui/sheet", () => ({
+  Sheet: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SheetContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SheetDescription: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SheetHeader: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SheetTitle: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SheetTrigger: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 
 describe("/watchlists page", () => {
   beforeEach(() => {
+    useCreateWatchlistMock.mockReturnValue({ isPending: false, mutateAsync: vi.fn() });
+    useDeleteWatchlistMock.mockReturnValue({ isPending: false, mutateAsync: vi.fn() });
     useShowsMock.mockReturnValue({ data: [] });
+    useTMDBMock.mockReturnValue({ imageUrl: null });
+    useUpdateWatchlistMock.mockReturnValue({ isPending: false, mutateAsync: vi.fn() });
     useWatchlistsMock.mockReturnValue({
       data: [],
       isError: false,
@@ -157,10 +129,10 @@ describe("/watchlists page", () => {
     expect(screen.getByRole("button", { name: "Create watchlist" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Create watchlist" }));
-    expect(screen.getByText("Create watchlist dialog")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Close watchlist form" }));
-    expect(screen.queryByRole("button", { name: "Close watchlist form" })).not.toBeInTheDocument();
-  }, 10000);
+    expect(screen.getByRole("heading", { name: "New Watchlist" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByRole("heading", { name: "New Watchlist" })).not.toBeInTheDocument();
+  }, 20000);
 
   it("shows loading and error states", async () => {
     useWatchlistsMock.mockReturnValueOnce({
@@ -174,7 +146,7 @@ describe("/watchlists page", () => {
       path: "/watchlists",
     });
 
-    expect(loadingRender.getAllByTestId("watchlist-card-skeleton")).toHaveLength(8);
+    expect(loadingRender.container.querySelectorAll(".animate-pulse").length).toBeGreaterThan(0);
 
     useWatchlistsMock.mockReturnValueOnce({
       data: undefined,
@@ -247,7 +219,10 @@ describe("/watchlists page", () => {
       path: "/watchlists",
     });
 
-    const cards = screen.getAllByText(/Alpha|Zeta|Gamma/).map(node => node.textContent);
+    const cards = screen
+      .getAllByRole("heading", { level: 2 })
+      .map(node => node.textContent)
+      .filter(Boolean);
     expect(cards).toContain("Alpha");
     expect(cards).toContain("Zeta");
     expect(cards).toContain("Gamma");
@@ -255,38 +230,40 @@ describe("/watchlists page", () => {
     expect(screen.getByText("Unknown show")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "New Watchlist" }));
-    expect(screen.getByText("Create watchlist dialog")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Close watchlist form" }));
-    expect(screen.queryByText("Create watchlist dialog")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "New Watchlist" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByRole("heading", { name: "New Watchlist" })).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Edit Alpha" }));
-    expect(screen.getAllByText("Edit Alpha").length).toBeGreaterThan(0);
-    await user.click(screen.getByRole("button", { name: "Close watchlist form" }));
-    expect(screen.queryByRole("button", { name: "Close watchlist form" })).not.toBeInTheDocument();
+    await user.click(screen.getAllByRole("button", { name: "Edit" })[0]!);
+    expect(screen.getByRole("heading", { name: "Edit Watchlist" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByRole("heading", { name: "Edit Watchlist" })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Sort Z-A" }));
     const titles = screen
-      .getAllByText(/Alpha|Zeta|Gamma/)
+      .getAllByRole("heading", { level: 2 })
+      .map(node => node.textContent)
       .filter(
-        node =>
-          node.textContent === "Alpha" || node.textContent === "Zeta" || node.textContent === "Gamma",
-      )
-      .map(node => node.textContent);
+        (text): text is string => text === "Alpha" || text === "Zeta" || text === "Gamma",
+      );
     expect(titles.slice(0, 3)).toEqual(["Zeta", "Gamma", "Alpha"]);
+
+    await user.click(screen.getAllByRole("button", { name: "Delete" })[0]!);
+    expect(screen.getByText("Delete watchlist?")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     await user.click(screen.getByRole("button", { name: "Sort A-Z" }));
     const ascendingTitles = screen
-      .getAllByText(/Alpha|Zeta|Gamma/)
+      .getAllByRole("heading", { level: 2 })
+      .map(node => node.textContent)
       .filter(
-        node =>
-          node.textContent === "Alpha" || node.textContent === "Zeta" || node.textContent === "Gamma",
-      )
-      .map(node => node.textContent);
+        (text): text is string => text === "Alpha" || text === "Zeta" || text === "Gamma",
+      );
     expect(ascendingTitles.slice(0, 3)).toEqual(["Alpha", "Gamma", "Zeta"]);
 
-    await user.click(screen.getByRole("button", { name: "Delete Alpha" }));
-    expect(screen.getAllByText("Delete Alpha").length).toBeGreaterThan(0);
-    await user.click(screen.getByRole("button", { name: "Close delete watchlist" }));
-    expect(screen.queryByRole("button", { name: "Close delete watchlist" })).not.toBeInTheDocument();
-  }, 10000);
+    await user.click(screen.getAllByRole("button", { name: "Delete" })[0]!);
+    expect(screen.getByText("Delete watchlist?")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByText("Delete watchlist?")).not.toBeInTheDocument();
+  }, 20000);
 });

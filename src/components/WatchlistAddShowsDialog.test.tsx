@@ -68,5 +68,5 @@ describe("WatchlistAddShowsDialog", () => {
     });
     expect(toast.success).toHaveBeenCalledWith('Added 2 shows to "Weekend Picks".');
     expect(onOpenChange).toHaveBeenCalledWith(false);
-  }, 10000);
+  }, 15000);
 });

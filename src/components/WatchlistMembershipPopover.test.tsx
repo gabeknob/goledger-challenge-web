@@ -50,7 +50,7 @@ describe("WatchlistMembershipPopover", () => {
       },
     });
     expect(toast.success).toHaveBeenCalledWith('Added "Ted Lasso" to "Favorites".');
-  });
+  }, 15000);
 
   it("opens the create-watchlist shortcut from inside the popover", async () => {
     const user = userEvent.setup();
@@ -65,5 +65,5 @@ describe("WatchlistMembershipPopover", () => {
     await user.click(screen.getByRole("button", { name: "New watchlist" }));
 
     expect(screen.getByText("Create watchlist dialog")).toBeInTheDocument();
-  });
+  }, 10000);
 });

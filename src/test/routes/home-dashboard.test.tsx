@@ -38,33 +38,6 @@ vi.mock("#/components/BottomTabBar", () => ({
   BottomTabBar: () => null,
 }));
 
-vi.mock("#/components/WatchlistCard", () => ({
-  WatchlistCard: ({
-    itemTitles,
-    onDelete,
-    onEdit,
-    watchlist,
-  }: {
-    itemTitles: string[];
-    onDelete: () => void;
-    onEdit: () => void;
-    watchlist: { title: string };
-  }) => (
-    <div>
-      <div>{watchlist.title}</div>
-      <button type="button" onClick={onEdit}>
-        Edit {watchlist.title}
-      </button>
-      <button type="button" onClick={onDelete}>
-        Delete {watchlist.title}
-      </button>
-      {itemTitles.map(title => (
-        <div key={title}>{title}</div>
-      ))}
-    </div>
-  ),
-}));
-
 vi.mock("#/lib/api", async (importOriginal: <T>() => Promise<T>) => {
   const actual = await importOriginal<typeof import("#/lib/api")>();
 
@@ -311,7 +284,6 @@ describe("home dashboard", () => {
   }, 15000);
 
   it("supports watchlists without tv show references", async () => {
-    const user = userEvent.setup();
     const recentShows = [makeTvShow({ title: "Ted Lasso" })];
     const alphabeticalShows = [makeTvShow({ title: "Ted Lasso", "@key": "tvShows:ted-lasso" })];
     const watchlists = [
@@ -341,10 +313,7 @@ describe("home dashboard", () => {
       ],
     });
 
-    expect(await screen.findByText("Empty references")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Empty references" })).toBeInTheDocument();
     expect(screen.queryByText("Unknown show")).not.toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Edit Empty references" }));
-    await user.click(screen.getByRole("button", { name: "Delete Empty references" }));
   }, 15000);
 });

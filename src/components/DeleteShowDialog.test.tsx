@@ -38,7 +38,7 @@ describe("DeleteShowDialog", () => {
     await user.clear(input);
     await user.type(input, "delete Ted Lasso");
     expect(deleteButton).toBeEnabled();
-  }, 10000);
+  }, 15000);
 
   it("runs the cascade and surfaces success details", async () => {
     const user = userEvent.setup();

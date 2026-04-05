@@ -8,12 +8,15 @@ import {
   Route as EpisodeRoute,
 } from "#/routes/_auth/shows/$showId/episodes/$episode";
 
+const createEpisodeMutateAsyncMock = vi.fn();
+const deleteEpisodeMutateAsyncMock = vi.fn();
 const useEpisodeMock = vi.fn();
 const useEpisodeHistoryMock = vi.fn();
 const useEpisodesMock = vi.fn();
 const useSeasonsMock = vi.fn();
 const useShowMock = vi.fn();
 const useTMDBEpisodeStillMock = vi.fn();
+const updateEpisodeMutateAsyncMock = vi.fn();
 const navigateMock = vi.fn();
 
 vi.mock("#/hooks/useShowDetail", () => ({
@@ -28,54 +31,26 @@ vi.mock("#/hooks/useTMDB", () => ({
   useTMDBEpisodeStill: (...args: unknown[]) => useTMDBEpisodeStillMock(...args),
 }));
 
-vi.mock("#/components/EpisodeFormDialog", () => ({
-  EpisodeFormDialog: ({
-    onOpenChange,
-    onSubmitted,
-    open,
-  }: {
-    onOpenChange: (open: boolean) => void;
-    onSubmitted: (nextEpisodeNumber: number) => void;
-    open: boolean;
-  }) =>
-    open ? (
-      <div>
-        <p>Episode form dialog</p>
-        <button type="button" onClick={() => onSubmitted(7)}>
-          Submit episode dialog
-        </button>
-        <button type="button" onClick={() => onOpenChange(false)}>
-          Close episode dialog
-        </button>
-      </div>
-    ) : null,
-}));
-
-vi.mock("#/components/DeleteEpisodeDialog", () => ({
-  DeleteEpisodeDialog: ({
-    onDeleted,
-    onOpenChange,
-    open,
-  }: {
-    onDeleted: () => void;
-    onOpenChange: (open: boolean) => void;
-    open: boolean;
-  }) =>
-    open ? (
-      <div>
-        <p>Delete episode dialog</p>
-        <button type="button" onClick={onDeleted}>
-          Confirm episode delete
-        </button>
-        <button type="button" onClick={() => onOpenChange(false)}>
-          Close delete episode
-        </button>
-      </div>
-    ) : null,
+vi.mock("#/hooks/useEpisodes", () => ({
+  useCreateEpisode: () => ({
+    isPending: false,
+    mutateAsync: (...args: unknown[]) => createEpisodeMutateAsyncMock(...args),
+  }),
+  useDeleteEpisode: () => ({
+    isPending: false,
+    mutateAsync: (...args: unknown[]) => deleteEpisodeMutateAsyncMock(...args),
+  }),
+  useUpdateEpisode: () => ({
+    isPending: false,
+    mutateAsync: (...args: unknown[]) => updateEpisodeMutateAsyncMock(...args),
+  }),
 }));
 
 describe("episode detail route", () => {
   beforeEach(() => {
+    createEpisodeMutateAsyncMock.mockReset();
+    deleteEpisodeMutateAsyncMock.mockReset();
+    updateEpisodeMutateAsyncMock.mockReset();
     vi.spyOn(EpisodeRoute, "useParams").mockReturnValue({
       episode: "s1e1",
       showId: "Ted%20Lasso",
@@ -376,16 +351,25 @@ describe("episode detail route", () => {
     expect(screen.getByText("Unknown time")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Edit Episode" }));
-    expect(screen.getByText("Episode form dialog")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Edit Episode" })).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Submit episode dialog" }));
-    expect(navigateMock).toHaveBeenCalledWith({
-      to: "/shows/$showId/episodes/$episode",
-      params: {
-        showId: "Ted%20Lasso",
-        episode: "s2e7",
-      },
-      resetScroll: false,
+    const episodeNumberInput = screen.getByLabelText("Episode number");
+    await user.clear(episodeNumberInput);
+    await user.type(episodeNumberInput, "7");
+    await user.clear(screen.getByLabelText("Release date"));
+    await user.type(screen.getByLabelText("Release date"), "2024-03-01T10:30");
+
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => {
+      expect(navigateMock).toHaveBeenCalledWith({
+        to: "/shows/$showId/episodes/$episode",
+        params: {
+          showId: "Ted%20Lasso",
+          episode: "s2e7",
+        },
+        resetScroll: false,
+      });
     });
   });
 
@@ -396,9 +380,9 @@ describe("episode detail route", () => {
 
     await user.click(screen.getByRole("button", { name: "Delete Episode" }));
 
-    expect(screen.getByText("Delete episode dialog")).toBeInTheDocument();
+    expect(screen.getByText("Delete episode?")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Confirm episode delete" }));
+    await user.click(screen.getByRole("button", { name: "Delete Episode" }));
 
     expect(navigateMock).toHaveBeenCalledWith({
       to: "/shows/$showId",

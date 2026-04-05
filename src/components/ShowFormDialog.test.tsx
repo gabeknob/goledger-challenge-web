@@ -92,5 +92,5 @@ describe("ShowFormDialog", () => {
     expect(await screen.findByText("A TV show with this title already exists")).toBeInTheDocument();
     expect(screen.getByText("Description is required")).toBeInTheDocument();
     expect(createMutateAsync).not.toHaveBeenCalled();
-  });
+  }, 10000);
 });

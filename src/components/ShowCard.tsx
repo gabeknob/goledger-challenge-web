@@ -25,7 +25,7 @@ export function ShowCard({ show, onEdit, onDelete }: ShowCardProps) {
   const fallbackTone = getPosterFallbackTone(show.title);
 
   return (
-    <Card className="group relative flex flex-col pt-0 overflow-hidden transition-shadow hover:shadow-md">
+    <Card className="group relative flex h-92 flex-col overflow-hidden pt-0 transition-shadow hover:shadow-md">
       <Link
         to="/shows/$showId"
         params={{ showId }}
@@ -99,7 +99,7 @@ function getPosterFallbackTone(title: string) {
 
 export function ShowCardSkeleton() {
   return (
-    <div className="flex flex-col overflow-hidden rounded-lg border bg-card">
+    <div className="flex h-92 flex-col overflow-hidden rounded-lg border bg-card">
       <div className="aspect-[2/3] w-full animate-pulse bg-muted" />
       <div className="flex flex-col gap-2 p-3">
         <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />

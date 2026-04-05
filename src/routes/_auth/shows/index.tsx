@@ -1,12 +1,6 @@
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  Cancel01Icon,
-  Search01Icon,
-  SortByDown01Icon,
-  SortByUp01Icon,
-  Tv01Icon,
-} from "@hugeicons/core-free-icons";
+import { Cancel01Icon, Search01Icon, Tv01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { DeleteShowDialog } from "#/components/DeleteShowDialog";
 import { EmptyState } from "#/components/EmptyState";
@@ -14,37 +8,50 @@ import { ShowFormDialog } from "#/components/ShowFormDialog";
 import { ShowCard, ShowCardSkeleton } from "#/components/ShowCard";
 import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "#/components/ui/select";
-import { useShows } from "#/hooks/useShows";
+import { useDebouncedState } from "#/hooks/useDebouncedState";
+import { useShowsBrowse } from "#/hooks/useShows";
 import type { TvShow } from "#/types/tvShow";
 
 export const Route = createFileRoute("/_auth/shows/")({
   component: ShowsPage,
 });
 
-type SortOrder = "az" | "za";
-
 function ShowsPage() {
-  const { data: shows, isLoading, isError } = useShows();
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<SortOrder>("az");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingShow, setEditingShow] = useState<TvShow | null>(null);
   const [deletingShow, setDeletingShow] = useState<TvShow | null>(null);
+  const { debouncedValue: debouncedSearch, isDebouncing } = useDebouncedState(search.trim(), 500);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const { data, fetchNextPage, hasNextPage, isError, isFetchingNextPage, isLoading } =
+    useShowsBrowse(debouncedSearch);
 
-  const filtered = (shows ?? [])
-    .filter(s => s.title.toLowerCase().includes(search.toLowerCase()))
-    .sort((a, b) => {
-      if (sort === "az") return a.title.localeCompare(b.title);
-      return b.title.localeCompare(a.title);
-    });
-  const allShows = shows ?? [];
+  const shows = data?.pages.flatMap(page => page.items) ?? [];
+  const filtered = shows;
+  const allShows = shows;
+  const lastShowRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      observerRef.current?.disconnect();
+
+      if (!node || !hasNextPage || isFetchingNextPage) {
+        return;
+      }
+
+      observerRef.current = new IntersectionObserver(
+        entries => {
+          if (entries[0]?.isIntersecting) {
+            void fetchNextPage();
+          }
+        },
+        {
+          rootMargin: "0px 0px 40px 0px",
+        },
+      );
+
+      observerRef.current.observe(node);
+    },
+    [fetchNextPage, hasNextPage, isFetchingNextPage],
+  );
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-10">
@@ -75,33 +82,17 @@ function ShowsPage() {
             </button>
           )}
         </div>
-
-        <Select value={sort} onValueChange={v => setSort(v as SortOrder)}>
-          <SelectTrigger className="w-full sm:w-36">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="az">
-              <span className="flex items-center gap-2">
-                <HugeiconsIcon icon={SortByUp01Icon} size={15} />
-                Alphabetical Asc.
-              </span>
-            </SelectItem>
-            <SelectItem value="za">
-              <span className="flex items-center gap-2">
-                <HugeiconsIcon icon={SortByDown01Icon} size={15} />
-                Alphabetical Desc.
-              </span>
-            </SelectItem>
-          </SelectContent>
-        </Select>
       </div>
+
+      {isDebouncing ? (
+        <p className="mb-4 text-xs font-medium text-muted-foreground">Updating results…</p>
+      ) : null}
 
       {isError && (
         <p className="text-sm text-destructive">Failed to load shows. Please try again.</p>
       )}
 
-      {isLoading && (
+      {isLoading && shows.length === 0 && (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {Array.from({ length: 12 }).map((_, i) => (
             <ShowCardSkeleton key={i} />
@@ -138,16 +129,27 @@ function ShowsPage() {
       )}
 
       {!isLoading && !isError && filtered.length > 0 && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-          {filtered.map(show => (
-            <ShowCard
-              key={show["@key"]}
-              show={show}
-              onEdit={setEditingShow}
-              onDelete={setDeletingShow}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            {filtered.map((show, index) => {
+              const isLast = index === filtered.length - 1;
+
+              return (
+                <div key={show["@key"]} ref={isLast ? lastShowRef : undefined}>
+                  <ShowCard show={show} onEdit={setEditingShow} onDelete={setDeletingShow} />
+                </div>
+              );
+            })}
+          </div>
+
+          {isFetchingNextPage ? (
+            <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <ShowCardSkeleton key={index} />
+              ))}
+            </div>
+          ) : null}
+        </>
       )}
 
       <ShowFormDialog

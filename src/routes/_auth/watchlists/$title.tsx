@@ -89,14 +89,14 @@ function WatchlistDetailPage() {
           <section className="rounded-[2rem] border border-border bg-card/70 px-6 py-8 shadow-sm">
             <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
               <div className="space-y-3">
-                <p className="text-xs font-semibold tracking-[0.24em] uppercase text-muted-foreground">
+                <p className="text-xs font-semibold tracking-[0.24em] text-muted-foreground uppercase">
                   Watchlist Detail
                 </p>
                 <h1 className="display-title text-4xl font-bold text-foreground md:text-5xl">
                   {isLoading ? "Loading..." : (watchlist?.title ?? decodedTitle)}
                 </h1>
                 {!isLoading ? (
-                  <p className="text-xs font-semibold tracking-[0.2em] uppercase text-muted-foreground">
+                  <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
                     {countLabel}
                   </p>
                 ) : null}

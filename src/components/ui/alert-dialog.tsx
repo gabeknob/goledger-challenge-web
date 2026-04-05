@@ -14,9 +14,7 @@ function AlertDialogTrigger({
   return <AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" {...props} />;
 }
 
-function AlertDialogPortal({
-  ...props
-}: React.ComponentProps<typeof AlertDialogPrimitive.Portal>) {
+function AlertDialogPortal({ ...props }: React.ComponentProps<typeof AlertDialogPrimitive.Portal>) {
   return <AlertDialogPrimitive.Portal data-slot="alert-dialog-portal" {...props} />;
 }
 
@@ -63,7 +61,7 @@ function AlertDialogFooter({ className, ...props }: React.ComponentProps<"div">)
   return (
     <div
       className={cn(
-        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end [&>[data-slot=alert-dialog-action]]:h-11 [&>[data-slot=alert-dialog-action]]:rounded-2xl [&>[data-slot=alert-dialog-action]]:px-4 [&>[data-slot=alert-dialog-action]]:text-sm [&>[data-slot=alert-dialog-cancel]]:h-11 [&>[data-slot=alert-dialog-cancel]]:rounded-2xl [&>[data-slot=alert-dialog-cancel]]:px-4 [&>[data-slot=alert-dialog-cancel]]:text-sm md:[&>[data-slot=alert-dialog-action]]:h-7 md:[&>[data-slot=alert-dialog-action]]:rounded-md md:[&>[data-slot=alert-dialog-action]]:px-2 md:[&>[data-slot=alert-dialog-action]]:text-xs md:[&>[data-slot=alert-dialog-cancel]]:h-7 md:[&>[data-slot=alert-dialog-cancel]]:rounded-md md:[&>[data-slot=alert-dialog-cancel]]:px-2 md:[&>[data-slot=alert-dialog-cancel]]:text-xs",
+        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end [&>[data-slot=alert-dialog-action]]:h-11 [&>[data-slot=alert-dialog-action]]:rounded-2xl [&>[data-slot=alert-dialog-action]]:px-4 [&>[data-slot=alert-dialog-action]]:text-sm md:[&>[data-slot=alert-dialog-action]]:h-7 md:[&>[data-slot=alert-dialog-action]]:rounded-md md:[&>[data-slot=alert-dialog-action]]:px-2 md:[&>[data-slot=alert-dialog-action]]:text-xs [&>[data-slot=alert-dialog-cancel]]:h-11 [&>[data-slot=alert-dialog-cancel]]:rounded-2xl [&>[data-slot=alert-dialog-cancel]]:px-4 [&>[data-slot=alert-dialog-cancel]]:text-sm md:[&>[data-slot=alert-dialog-cancel]]:h-7 md:[&>[data-slot=alert-dialog-cancel]]:rounded-md md:[&>[data-slot=alert-dialog-cancel]]:px-2 md:[&>[data-slot=alert-dialog-cancel]]:text-xs",
         className,
       )}
       {...props}

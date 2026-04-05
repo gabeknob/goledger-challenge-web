@@ -304,9 +304,7 @@ describe("useTMDB", () => {
     );
 
     await waitFor(() => {
-      expect(result.current.imageUrl).toBe(
-        "https://image.tmdb.org/t/p/w500/fallback-still.jpg",
-      );
+      expect(result.current.imageUrl).toBe("https://image.tmdb.org/t/p/w500/fallback-still.jpg");
     });
 
     expect(tmdbApi.get).toHaveBeenCalledWith("/tv/77/season/1/episode/25");

@@ -3,13 +3,8 @@ import userEvent from "@testing-library/user-event";
 
 import { makeEpisode, makeSeason, makeTvShow } from "#/test/factories";
 import { queryClient } from "#/lib/queryClient";
-import {
-  EpisodeDetailPage,
-  episodeDetailRouteApi,
-} from "#/pages/_auth/shows/EpisodeDetailPage";
-import {
-  Route as EpisodeRoute,
-} from "#/routes/_auth/shows/$showId/episodes/$episode";
+import { EpisodeDetailPage, episodeDetailRouteApi } from "#/pages/_auth/shows/EpisodeDetailPage";
+import { Route as EpisodeRoute } from "#/routes/_auth/shows/$showId/episodes/$episode";
 
 const createEpisodeMutateAsyncMock = vi.fn();
 const deleteEpisodeMutateAsyncMock = vi.fn();

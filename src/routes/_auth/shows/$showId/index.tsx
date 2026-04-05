@@ -163,7 +163,7 @@ function ShowDetailPage() {
     return (
       <main className="mx-auto flex min-h-[70svh] max-w-3xl flex-col items-center justify-center px-4 text-center">
         <div className="rounded-4xl border border-border bg-card/70 px-8 py-10 shadow-sm">
-          <p className="text-xs font-semibold tracking-[0.24em] uppercase text-muted-foreground">
+          <p className="text-xs font-semibold tracking-[0.24em] text-muted-foreground uppercase">
             Deleting Show
           </p>
           <h1 className="display-title mt-4 text-3xl font-bold text-foreground">
@@ -197,9 +197,9 @@ function ShowDetailPage() {
 
   if (isRenamingShow) {
     return (
-      <main className="mx-auto flex mt-8 min-h-[70svh] max-w-3xl flex-col items-center justify-center px-4 text-center">
+      <main className="mx-auto mt-8 flex min-h-[70svh] max-w-3xl flex-col items-center justify-center px-4 text-center">
         <div className="rounded-4xl border border-border bg-card/70 px-8 py-10 shadow-sm">
-          <p className="text-xs font-semibold tracking-[0.24em] uppercase text-muted-foreground">
+          <p className="text-xs font-semibold tracking-[0.24em] text-muted-foreground uppercase">
             Renaming Show
           </p>
           <h1 className="display-title mt-4 text-3xl font-bold text-foreground">
@@ -247,7 +247,7 @@ function ShowDetailPage() {
         <section className="flex flex-col gap-4">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold tracking-[0.24em] uppercase text-muted-foreground">
+              <p className="text-xs font-semibold tracking-[0.24em] text-muted-foreground uppercase">
                 Seasons
               </p>
               <h2 className="display-title text-2xl font-semibold text-foreground">
@@ -280,7 +280,7 @@ function ShowDetailPage() {
                   return (
                     <div
                       key={season["@key"]}
-                      className={`inline-flex min-h-10 w-full min-w-0 items-stretch py-1 pl-1 pr-1 md:w-auto ${wrapperClassName}`}
+                      className={`inline-flex min-h-10 w-full min-w-0 items-stretch py-1 pr-1 pl-1 md:w-auto ${wrapperClassName}`}
                     >
                       <button
                         type="button"
@@ -292,7 +292,7 @@ function ShowDetailPage() {
                             resetScroll: false,
                           })
                         }
-                        className="h-full min-w-0 truncate flex-1 rounded-full px-3 py-2 text-sm font-medium text-shadow-md"
+                        className="h-full min-w-0 flex-1 truncate rounded-full px-3 py-2 text-sm font-medium text-shadow-md"
                       >
                         Season {season.number}
                       </button>
@@ -301,7 +301,7 @@ function ShowDetailPage() {
                           <Button
                             variant="ghost"
                             size="xs"
-                            className={`h-full min-h-0 self-stretch overflow-hidden rounded-full bg-white text-[0.65rem] font-semibold tracking-[0.12em] uppercase text-primary shadow-sm transition-all duration-200 ease-out hover:text-foreground hover:border-foreground ${
+                            className={`h-full min-h-0 self-stretch overflow-hidden rounded-full bg-white text-[0.65rem] font-semibold tracking-[0.12em] text-primary uppercase shadow-sm transition-all duration-200 ease-out hover:border-foreground hover:text-foreground ${
                               isActive
                                 ? "ml-0.5 max-w-24 px-2.5 opacity-100"
                                 : "pointer-events-none ml-0 max-w-0 px-0 opacity-0"
@@ -544,7 +544,7 @@ function ShowHero({
           src={posterUrl}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 size-full blur-sm object-cover opacity-70"
+          className="absolute inset-0 size-full object-cover opacity-70 blur-sm"
         />
       ) : null}
       <div className="absolute inset-0 bg-gradient-to-b from-background/5 via-background/35 to-background" />
@@ -569,18 +569,18 @@ function ShowHero({
         </div>
 
         <div className="max-w-3xl space-y-4 md:pb-2">
-          <p className="text-shadow-sm text-xs font-semibold tracking-[0.24em] uppercase text-white/80">
+          <p className="text-xs font-semibold tracking-[0.24em] text-white/80 uppercase text-shadow-sm">
             Show Detail
           </p>
           {isLoading ? <Skeleton className="h-12 w-3/4 bg-background/20" /> : null}
           {!isLoading ? (
-            <h1 className="display-title text-4xl font-bold text-shadow-md text-white md:text-6xl">
+            <h1 className="display-title text-4xl font-bold text-white text-shadow-md md:text-6xl">
               {show?.title ?? fallbackTitle}
             </h1>
           ) : null}
           {isLoading ? <Skeleton className="h-20 w-full max-w-2xl bg-background/20" /> : null}
           {!isLoading ? (
-            <p className="max-w-2xl text-sm leading-7 text-shadow-sm text-white/88 md:text-base">
+            <p className="max-w-2xl text-sm leading-7 text-white/88 text-shadow-sm md:text-base">
               {show?.description ?? "No description available."}
             </p>
           ) : null}
@@ -733,11 +733,11 @@ function EpisodeRow({
       }}
       className="group relative block"
     >
-      <div className="pointer-events-none absolute right-3 top-3 z-10 hidden items-center gap-1 rounded-lg border border-border/60 bg-background/92 p-1 shadow-sm backdrop-blur opacity-0 transition-all duration-200 md:flex md:group-hover:pointer-events-auto md:group-hover:opacity-100">
+      <div className="pointer-events-none absolute top-3 right-3 z-10 hidden items-center gap-1 rounded-lg border border-border/60 bg-background/92 p-1 opacity-0 shadow-sm backdrop-blur transition-all duration-200 md:flex md:group-hover:pointer-events-auto md:group-hover:opacity-100">
         <Button
           size="xs"
           variant="ghost"
-          className="text-[0.65rem] uppercase tracking-[0.12em]"
+          className="text-[0.65rem] tracking-[0.12em] uppercase"
           onClick={event => {
             event.preventDefault();
             event.stopPropagation();
@@ -750,7 +750,7 @@ function EpisodeRow({
         <Button
           size="xs"
           variant="destructive"
-          className="text-[0.65rem] uppercase tracking-[0.12em]"
+          className="text-[0.65rem] tracking-[0.12em] uppercase"
           onClick={event => {
             event.preventDefault();
             event.stopPropagation();
@@ -774,7 +774,7 @@ function EpisodeRow({
             <div className={`absolute inset-0 ${getEpisodeTone(episode.title)}`} />
           )}
           <div className="absolute inset-0 bg-linear-to-t from-foreground/30 via-transparent to-transparent" />
-          <div className="absolute right-1.5 top-1.5 z-10 md:hidden">
+          <div className="absolute top-1.5 right-1.5 z-10 md:hidden">
             <ResponsiveActionMenu
               title="Episode actions"
               description={`Manage ${episode.title}`}
@@ -794,11 +794,11 @@ function EpisodeRow({
         </div>
         <div className="flex flex-col gap-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-muted px-2.5 py-1 text-[0.65rem] font-semibold tracking-[0.2em] uppercase text-muted-foreground">
+            <span className="rounded-full bg-muted px-2.5 py-1 text-[0.65rem] font-semibold tracking-[0.2em] text-muted-foreground uppercase">
               Episode {episode.episodeNumber}
             </span>
             {episode.rating !== undefined ? (
-              <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[0.65rem] font-semibold tracking-[0.16em] uppercase text-primary">
+              <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[0.65rem] font-semibold tracking-[0.16em] text-primary uppercase">
                 Rating {episode.rating.toFixed(1)}
               </span>
             ) : null}

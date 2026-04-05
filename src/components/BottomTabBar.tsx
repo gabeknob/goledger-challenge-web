@@ -4,7 +4,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 
 export function BottomTabBar() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/90 backdrop-blur-md md:hidden">
+    <nav className="fixed right-0 bottom-0 left-0 z-50 border-t border-border bg-background/90 backdrop-blur-md md:hidden">
       <div className="flex items-center justify-around px-4 py-1">
         <Link
           to="/"

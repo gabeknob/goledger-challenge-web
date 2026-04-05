@@ -63,7 +63,7 @@ export function ShowsPage() {
           <HugeiconsIcon
             icon={Search01Icon}
             size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
           />
           <Input
             placeholder="Search shows…"
@@ -74,7 +74,7 @@ export function ShowsPage() {
           {search && (
             <button
               onClick={() => setSearch("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             >
               <HugeiconsIcon icon={Cancel01Icon} size={16} />
             </button>

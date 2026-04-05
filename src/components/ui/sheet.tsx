@@ -61,12 +61,7 @@ function SheetContent({
         {children}
         {showCloseButton ? (
           <DialogPrimitive.Close asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              className="absolute top-4 right-4"
-            >
+            <Button type="button" variant="ghost" size="icon-sm" className="absolute top-4 right-4">
               <HugeiconsIcon icon={Cancel01Icon} size={16} />
               <span className="sr-only">Close</span>
             </Button>

@@ -66,7 +66,7 @@ export function WatchlistsPage() {
           <div className="relative flex-1">
             <HugeiconsIcon
               icon={Search01Icon}
-              className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+              className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
             />
             <Input
               placeholder="Search watchlists..."
@@ -78,7 +78,7 @@ export function WatchlistsPage() {
               <button
                 type="button"
                 onClick={() => setSearch("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
                 <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
               </button>

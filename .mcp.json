@@ -6,7 +6,7 @@
     },
     "jetbrains": {
       "type": "sse",
-      "url": "http://127.0.0.1:64342/sse"
+      "url": "http://127.0.0.1:64343/sse"
     },
     "hugeicons": {
       "command": "pnpm",

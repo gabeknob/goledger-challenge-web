@@ -30,7 +30,7 @@ export function ShowCard({ show, onEdit, onDelete }: ShowCardProps) {
         to="/shows/$showId"
         params={{ showId }}
         search={{ season: undefined }}
-        className="flex flex-col flex-1"
+        className="flex flex-1 flex-col"
       >
         <div className={`relative aspect-[2/3] w-full overflow-hidden ${fallbackTone}`}>
           {imageUrl ? (
@@ -53,7 +53,7 @@ export function ShowCard({ show, onEdit, onDelete }: ShowCardProps) {
         </CardContent>
       </Link>
 
-      <div className="absolute right-2 top-2">
+      <div className="absolute top-2 right-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

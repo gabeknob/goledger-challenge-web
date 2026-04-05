@@ -309,7 +309,9 @@ describe("useShows", () => {
       .spyOn(queryClient, "invalidateQueries")
       .mockResolvedValue(undefined);
     vi.spyOn(queryClient, "getQueryData").mockReturnValue([watchlist]);
-    vi.spyOn(queryClient, "getQueriesData").mockReturnValue([[["show", current.title], current]] as never);
+    vi.spyOn(queryClient, "getQueriesData").mockReturnValue([
+      [["show", current.title], current],
+    ] as never);
 
     const { result } = renderHook(() => useUpdateShow(), {
       wrapper: createWrapper(),

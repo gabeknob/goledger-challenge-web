@@ -19,7 +19,7 @@ export function WatchlistShowCard({ onRemove, show }: WatchlistShowCardProps) {
 
   return (
     <Card className="group relative overflow-hidden rounded-lg border border-border bg-card/80 pt-0 transition-shadow hover:shadow-md">
-      <div className="absolute right-2 top-2 z-10">
+      <div className="absolute top-2 right-2 z-10">
         <ResponsiveActionMenu
           title="Show actions"
           description={`Manage ${show.title} in this watchlist`}
@@ -52,7 +52,7 @@ export function WatchlistShowCard({ onRemove, show }: WatchlistShowCardProps) {
           ) : null}
           <div className="absolute inset-0 bg-linear-to-t from-card/95 via-card/35 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 p-4">
-            <h3 className="line-clamp-2 text-base font-semibold text-shadow-md text-white">
+            <h3 className="line-clamp-2 text-base font-semibold text-white text-shadow-md">
               {show.title}
             </h3>
           </div>

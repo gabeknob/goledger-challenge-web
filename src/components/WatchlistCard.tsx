@@ -31,7 +31,7 @@ export function WatchlistCard({
   return (
     <Card className="group relative overflow-hidden rounded-4xl border border-border bg-card/80 pt-0 transition-shadow hover:shadow-md">
       {showActions ? (
-        <div className="absolute right-3 top-3 z-10">
+        <div className="absolute top-3 right-3 z-10">
           <ResponsiveActionMenu
             title="Watchlist actions"
             description={`Manage ${watchlist.title}`}
@@ -69,7 +69,7 @@ export function WatchlistCard({
             <h2 className="line-clamp-2 text-lg font-semibold text-foreground">
               {watchlist.title}
             </h2>
-            <p className="text-[0.7rem] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
+            <p className="text-[0.7rem] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
               {countLabel}
             </p>
           </div>
@@ -174,7 +174,7 @@ function WatchlistEmptyCover({ title }: { title: string }) {
   return (
     <div className="flex size-full items-end bg-background/95">
       <div className="flex size-full items-end rounded-none bg-muted p-0">
-        <span className="p-0 text-sm font-semibold text-foreground pb-3 line-clamp-3 pl-3">
+        <span className="line-clamp-3 p-0 pb-3 pl-3 text-sm font-semibold text-foreground">
           {title}
         </span>
       </div>

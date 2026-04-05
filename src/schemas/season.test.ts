@@ -17,11 +17,13 @@ describe("createSeasonSchema", () => {
 
   it("allows the current season number in edit mode", () => {
     const currentSeason = makeSeason({ number: 2 });
-    const result = createSeasonSchema([makeSeason({ number: 1 }), currentSeason], currentSeason)
-      .safeParse({
-        number: 2,
-        year: 2024,
-      });
+    const result = createSeasonSchema(
+      [makeSeason({ number: 1 }), currentSeason],
+      currentSeason,
+    ).safeParse({
+      number: 2,
+      year: 2024,
+    });
 
     expect(result.success).toBe(true);
   });

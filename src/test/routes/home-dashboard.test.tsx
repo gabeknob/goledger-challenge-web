@@ -106,10 +106,7 @@ describe("home dashboard", () => {
     const { container } = await renderRoute({
       component: HomePage,
       path: "/",
-      additionalRoutes: [
-        { path: "/shows" },
-        { path: "/watchlists" },
-      ],
+      additionalRoutes: [{ path: "/shows" }, { path: "/watchlists" }],
     });
 
     expect(container.getElementsByClassName("animate-pulse").length).toBeGreaterThan(0);
@@ -124,10 +121,7 @@ describe("home dashboard", () => {
     await renderRoute({
       component: HomePage,
       path: "/",
-      additionalRoutes: [
-        { path: "/shows" },
-        { path: "/watchlists" },
-      ],
+      additionalRoutes: [{ path: "/shows" }, { path: "/watchlists" }],
     });
 
     expect(await screen.findByText("Failed to load the latest shows.")).toBeInTheDocument();
@@ -137,10 +131,7 @@ describe("home dashboard", () => {
 
   it("renders populated sections and supports carousel navigation", async () => {
     const user = userEvent.setup();
-    const recentShows = [
-      makeTvShow({ title: "Ted Lasso" }),
-      makeTvShow({ title: "Severance" }),
-    ];
+    const recentShows = [makeTvShow({ title: "Ted Lasso" }), makeTvShow({ title: "Severance" })];
     const alphabeticalShows = Array.from({ length: 10 }, (_, index) =>
       makeTvShow({
         title: `Show ${index + 1}`,
@@ -173,11 +164,7 @@ describe("home dashboard", () => {
     await renderRoute({
       component: HomePage,
       path: "/",
-      additionalRoutes: [
-        { path: "/shows" },
-        { path: "/watchlists" },
-        { path: "/shows/$showId" },
-      ],
+      additionalRoutes: [{ path: "/shows" }, { path: "/watchlists" }, { path: "/shows/$showId" }],
     });
 
     expect(await screen.findByRole("heading", { name: "Ted Lasso" })).toBeInTheDocument();
@@ -231,11 +218,7 @@ describe("home dashboard", () => {
     const { container } = await renderRoute({
       component: HomePage,
       path: "/",
-      additionalRoutes: [
-        { path: "/shows" },
-        { path: "/watchlists" },
-        { path: "/shows/$showId" },
-      ],
+      additionalRoutes: [{ path: "/shows" }, { path: "/watchlists" }, { path: "/shows/$showId" }],
     });
 
     expect(await screen.findByRole("heading", { name: "Ted Lasso" })).toBeInTheDocument();
@@ -272,11 +255,7 @@ describe("home dashboard", () => {
     await renderRoute({
       component: HomePage,
       path: "/",
-      additionalRoutes: [
-        { path: "/shows" },
-        { path: "/watchlists" },
-        { path: "/shows/$showId" },
-      ],
+      additionalRoutes: [{ path: "/shows" }, { path: "/watchlists" }, { path: "/shows/$showId" }],
     });
 
     expect(await screen.findByText("Broken references")).toBeInTheDocument();
@@ -306,11 +285,7 @@ describe("home dashboard", () => {
     await renderRoute({
       component: HomePage,
       path: "/",
-      additionalRoutes: [
-        { path: "/shows" },
-        { path: "/watchlists" },
-        { path: "/shows/$showId" },
-      ],
+      additionalRoutes: [{ path: "/shows" }, { path: "/watchlists" }, { path: "/shows/$showId" }],
     });
 
     expect(await screen.findByRole("heading", { name: "Empty references" })).toBeInTheDocument();

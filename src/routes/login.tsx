@@ -37,7 +37,7 @@ function LoginPage() {
     <div className="flex min-h-svh flex-col items-center justify-center px-4">
       <div className="w-full max-w-sm rounded-2xl border border-border bg-card px-8 py-10 shadow-sm">
         <div className="mb-8 text-center">
-          <p className="mb-2 text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+          <p className="mb-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
             GoLedger TV
           </p>
           <h1 className="display-title text-3xl font-bold text-foreground">Welcome back</h1>

@@ -179,7 +179,7 @@ function CarouselSection({
 
         <div className="relative flex min-h-[24rem] flex-col justify-between p-6 md:min-h-[30rem] md:p-8">
           <div className="max-w-2xl space-y-4">
-            <p className="text-xs font-semibold tracking-[0.24em] uppercase text-muted-foreground">
+            <p className="text-xs font-semibold tracking-[0.24em] text-muted-foreground uppercase">
               Recently Added
             </p>
             <h1 className="display-title text-4xl font-bold text-foreground text-shadow-sm md:text-6xl">
@@ -282,7 +282,7 @@ function HorizontalShowsSection({
         </SectionMessage>
       ) : (
         <div className="-mx-4 -mt-3 overflow-x-auto px-4">
-          <div className="flex gap-4 pb-2 pt-4">
+          <div className="flex gap-4 pt-4 pb-2">
             {shows.map(show => (
               <HomeShowCard key={show["@key"]} show={show} />
             ))}
@@ -343,7 +343,7 @@ function HorizontalWatchlistsSection({
                 <Link to="/watchlists" className="flex h-[22.5rem] flex-col p-5">
                   <div className="flex flex-1 flex-col justify-between gap-4">
                     <div className="space-y-2">
-                      <p className="text-xs font-semibold tracking-[0.22em] uppercase text-muted-foreground">
+                      <p className="text-xs font-semibold tracking-[0.22em] text-muted-foreground uppercase">
                         More to explore
                       </p>
                       <h3 className="display-title text-2xl font-semibold text-foreground">
@@ -385,7 +385,7 @@ function DashboardSection({
     <section className="rounded-[2rem] border border-border bg-card/70 p-6 shadow-sm">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="space-y-2">
-          <p className="text-xs font-semibold tracking-[0.24em] uppercase text-muted-foreground">
+          <p className="text-xs font-semibold tracking-[0.24em] text-muted-foreground uppercase">
             {eyebrow}
           </p>
           <h2 className="display-title text-3xl font-bold text-foreground">{title}</h2>
@@ -456,7 +456,7 @@ function SeeMoreShowsCard() {
     <Card className="aspect-[2/3] w-[11rem] shrink-0 overflow-hidden rounded-[1.5rem] border border-dashed border-border bg-card shadow-sm transition-shadow hover:shadow-md">
       <Link to="/shows" className="flex h-full flex-col justify-between p-4">
         <div className="space-y-2">
-          <p className="text-xs font-semibold tracking-[0.22em] uppercase text-muted-foreground">
+          <p className="text-xs font-semibold tracking-[0.22em] text-muted-foreground uppercase">
             More to browse
           </p>
           <h3 className="display-title text-2xl font-semibold text-foreground">See more</h3>

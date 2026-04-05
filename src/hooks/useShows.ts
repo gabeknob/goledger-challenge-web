@@ -279,12 +279,7 @@ async function buildShowRenamePlan(show: TvShow): Promise<{
   };
 }
 
-async function renameShow({
-  current,
-  next,
-  onPlanChange,
-  onTaskStatusChange,
-}: UpdateShowPayload) {
+async function renameShow({ current, next, onPlanChange, onTaskStatusChange }: UpdateShowPayload) {
   const { plan, relatedEpisodes, relatedSeasons, relatedWatchlists } =
     await buildShowRenamePlan(current);
 
@@ -325,14 +320,18 @@ async function renameShow({
   const recreatedSeasonByNumber = new Map(
     recreatedSeasons.map(season => [season.number, season] as const),
   );
-  const oldSeasonNumberByKey = new Map(relatedSeasons.map(season => [season["@key"], season.number] as const));
+  const oldSeasonNumberByKey = new Map(
+    relatedSeasons.map(season => [season["@key"], season.number] as const),
+  );
 
   for (const episode of relatedEpisodes) {
     const seasonNumber = oldSeasonNumberByKey.get(episode.season["@key"]);
     const recreatedSeason = seasonNumber ? recreatedSeasonByNumber.get(seasonNumber) : undefined;
 
     if (!recreatedSeason) {
-      throw new Error(`Could not locate recreated Season ${seasonNumber ?? "?"} for the renamed show.`);
+      throw new Error(
+        `Could not locate recreated Season ${seasonNumber ?? "?"} for the renamed show.`,
+      );
     }
 
     await runTask(`episode:create:${episode["@key"]}`, () =>

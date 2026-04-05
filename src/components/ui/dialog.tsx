@@ -60,12 +60,7 @@ function DialogContent({
         {children}
         {showCloseButton ? (
           <DialogPrimitive.Close asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              className="absolute top-4 right-4"
-            >
+            <Button type="button" variant="ghost" size="icon-sm" className="absolute top-4 right-4">
               <HugeiconsIcon icon={Cancel01Icon} size={16} />
               <span className="sr-only">Close</span>
             </Button>
@@ -82,7 +77,10 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
 
 function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <div className={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)} {...props} />
+    <div
+      className={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)}
+      {...props}
+    />
   );
 }
 

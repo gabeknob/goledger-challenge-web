@@ -46,7 +46,9 @@ function CommandEmpty({ className, ...props }: ComponentProps<"div">) {
 }
 
 function CommandGroup({ className, ...props }: ComponentProps<"div">) {
-  return <div data-slot="command-group" className={cn("flex flex-col gap-1", className)} {...props} />;
+  return (
+    <div data-slot="command-group" className={cn("flex flex-col gap-1", className)} {...props} />
+  );
 }
 
 function CommandItem({ className, ...props }: ComponentProps<"button">) {
@@ -55,7 +57,7 @@ function CommandItem({ className, ...props }: ComponentProps<"button">) {
       type="button"
       data-slot="command-item"
       className={cn(
-        "flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-foreground/6 focus-visible:bg-foreground/6 outline-none",
+        "flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-foreground transition-colors outline-none hover:bg-foreground/6 focus-visible:bg-foreground/6",
         className,
       )}
       {...props}
@@ -64,7 +66,13 @@ function CommandItem({ className, ...props }: ComponentProps<"button">) {
 }
 
 function CommandSeparator({ className, ...props }: ComponentProps<"div">) {
-  return <div data-slot="command-separator" className={cn("my-1 h-px bg-border/70", className)} {...props} />;
+  return (
+    <div
+      data-slot="command-separator"
+      className={cn("my-1 h-px bg-border/70", className)}
+      {...props}
+    />
+  );
 }
 
 export {

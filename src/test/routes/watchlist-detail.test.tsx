@@ -213,9 +213,7 @@ describe("watchlist detail route", () => {
         },
       });
     });
-    expect(toastSuccessMock).toHaveBeenCalledWith(
-      'Removed "Ted Lasso" from "Renamed Watchlist".',
-    );
+    expect(toastSuccessMock).toHaveBeenCalledWith('Removed "Ted Lasso" from "Renamed Watchlist".');
 
     await user.click(screen.getByRole("button", { name: "Delete Watchlist" }));
     expect(screen.getByText("Delete watchlist?")).toBeInTheDocument();

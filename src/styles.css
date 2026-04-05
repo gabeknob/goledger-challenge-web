@@ -8,38 +8,48 @@
 @plugin "@tailwindcss/typography";
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.147 0.004 49.25);
+  /* #ecf0f1 — the explicit light background from brand palette */
+  --background: oklch(0.947 0.007 214);
+  /* dark navy — inverted from gray-12 dark, high contrast on light bg */
+  --foreground: oklch(0.192 0.037 249);
+  /* white cards float off the tinted background */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.147 0.004 49.25);
+  --card-foreground: oklch(0.192 0.037 249);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.147 0.004 49.25);
-  --primary: oklch(0.553 0.195 38.402);
-  --primary-foreground: oklch(0.98 0.016 73.684);
-  --secondary: oklch(0.967 0.001 286.375);
-  --secondary-foreground: oklch(0.21 0.006 285.885);
-  --muted: oklch(0.97 0.001 106.424);
-  --muted-foreground: oklch(0.553 0.013 58.071);
-  --accent: oklch(0.97 0.001 106.424);
-  --accent-foreground: oklch(0.216 0.006 56.043);
+  --popover-foreground: oklch(0.192 0.037 249);
+  /* blue-9 — #4267b2 brand */
+  --primary: oklch(0.524 0.1259 263);
+  --primary-foreground: oklch(1 0 0);
+  /* light blue-gray — chip and secondary button surfaces */
+  --secondary: oklch(0.906 0.014 249);
+  --secondary-foreground: oklch(0.192 0.037 249);
+  /* subtle muted background — slightly more saturated than bg */
+  --muted: oklch(0.912 0.012 249);
+  /* gray-9 equivalent — readable subdued text on both bg and card */
+  --muted-foreground: oklch(0.537 0.0559 249);
+  --accent: oklch(0.912 0.012 249);
+  --accent-foreground: oklch(0.192 0.037 249);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.923 0.003 48.717);
-  --input: oklch(0.923 0.003 48.717);
-  --ring: oklch(0.709 0.01 56.259);
-  --chart-1: oklch(0.837 0.128 66.29);
-  --chart-2: oklch(0.705 0.213 47.604);
-  --chart-3: oklch(0.646 0.222 41.116);
-  --chart-4: oklch(0.553 0.195 38.402);
-  --chart-5: oklch(0.47 0.157 37.304);
+  /* visible but subtle border between the bg and card */
+  --border: oklch(0.869 0.017 249);
+  --input: oklch(0.869 0.017 249);
+  --ring: oklch(0.524 0.1259 263);
+  /* chart series: blue-9 → blue-11 → blue-7 → blue-12 → blue-5
+     spread across the luminance axis for maximum differentiation */
+  --chart-1: oklch(0.524 0.1259 263);
+  --chart-2: oklch(0.773 0.115 263);
+  --chart-3: oklch(0.459 0.1098 263);
+  --chart-4: oklch(0.909 0.0409 263);
+  --chart-5: oklch(0.359 0.0964 263);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0.001 106.423);
-  --sidebar-foreground: oklch(0.147 0.004 49.25);
-  --sidebar-primary: oklch(0.646 0.222 41.116);
-  --sidebar-primary-foreground: oklch(0.98 0.016 73.684);
-  --sidebar-accent: oklch(0.97 0.001 106.424);
-  --sidebar-accent-foreground: oklch(0.216 0.006 56.043);
-  --sidebar-border: oklch(0.923 0.003 48.717);
-  --sidebar-ring: oklch(0.709 0.01 56.259);
+  --sidebar: oklch(0.906 0.014 249);
+  --sidebar-foreground: oklch(0.192 0.037 249);
+  --sidebar-primary: oklch(0.524 0.1259 263);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.869 0.017 249);
+  --sidebar-accent-foreground: oklch(0.192 0.037 249);
+  --sidebar-border: oklch(0.869 0.017 249);
+  --sidebar-ring: oklch(0.524 0.1259 263);
 }
 
 @theme inline {
@@ -86,37 +96,45 @@
 }
 
 .dark {
-  --background: oklch(0.147 0.004 49.25);
-  --foreground: oklch(0.985 0.001 106.423);
-  --card: oklch(0.216 0.006 56.043);
-  --card-foreground: oklch(0.985 0.001 106.423);
-  --popover: oklch(0.216 0.006 56.043);
-  --popover-foreground: oklch(0.985 0.001 106.423);
-  --primary: oklch(0.47 0.157 37.304);
-  --primary-foreground: oklch(0.98 0.016 73.684);
-  --secondary: oklch(0.274 0.006 286.033);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.268 0.007 34.298);
-  --muted-foreground: oklch(0.709 0.01 56.259);
-  --accent: oklch(0.268 0.007 34.298);
-  --accent-foreground: oklch(0.985 0.001 106.423);
+  /* gray-1 — near-black with a faint steel-blue tint */
+  --background: oklch(0 0.0146 249);
+  /* gray-12 — near-white with blue tint, max contrast on dark bg */
+  --foreground: oklch(0.949 0.0103 249);
+  /* gray-2 — first level of card elevation */
+  --card: oklch(0.183 0.015 249);
+  --card-foreground: oklch(0.949 0.0103 249);
+  --popover: oklch(0.183 0.015 249);
+  --popover-foreground: oklch(0.949 0.0103 249);
+  /* blue-9 — #4267b2 brand, same in both modes */
+  --primary: oklch(0.524 0.1259 263);
+  --primary-foreground: oklch(1 0 0);
+  /* gray-4 — dark muted surface for secondary buttons / chips */
+  --secondary: oklch(0.275 0.027 249);
+  --secondary-foreground: oklch(0.949 0.0103 249);
+  /* gray-3 — subtler muted background (one step below card) */
+  --muted: oklch(0.239 0.0211 249);
+  /* gray-11 — accessible subdued text on dark surfaces */
+  --muted-foreground: oklch(0.768 0.0383 249);
+  /* blue-3 — dark blue accent surface for hover / active states */
+  --accent: oklch(0.257 0.0623 263);
+  /* blue-11 — bright blue text on the dark accent background */
+  --accent-foreground: oklch(0.773 0.115 263);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.553 0.013 58.071);
-  --chart-1: oklch(0.837 0.128 66.29);
-  --chart-2: oklch(0.705 0.213 47.604);
-  --chart-3: oklch(0.646 0.222 41.116);
-  --chart-4: oklch(0.553 0.195 38.402);
-  --chart-5: oklch(0.47 0.157 37.304);
-  --sidebar: oklch(0.216 0.006 56.043);
-  --sidebar-foreground: oklch(0.985 0.001 106.423);
-  --sidebar-primary: oklch(0.705 0.213 47.604);
-  --sidebar-primary-foreground: oklch(0.98 0.016 73.684);
-  --sidebar-accent: oklch(0.268 0.007 34.298);
-  --sidebar-accent-foreground: oklch(0.985 0.001 106.423);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.553 0.013 58.071);
+  /* gray-11 at low alpha — blue-tinted border, same subtlety as white/10% */
+  --border: oklch(0.768 0.0383 249 / 12%);
+  --input: oklch(0.768 0.0383 249 / 18%);
+  /* blue-9 focus ring — clearly brand-coloured */
+  --ring: oklch(0.524 0.1259 263);
+  /* chart series unchanged from :root — luminance spread works on dark bg too */
+  --sidebar: oklch(0.183 0.015 249);
+  --sidebar-foreground: oklch(0.949 0.0103 249);
+  --sidebar-primary: oklch(0.524 0.1259 263);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  /* blue-3 for sidebar hover — dark but clearly in the primary family */
+  --sidebar-accent: oklch(0.257 0.0623 263);
+  --sidebar-accent-foreground: oklch(0.773 0.115 263);
+  --sidebar-border: oklch(0.768 0.0383 249 / 12%);
+  --sidebar-ring: oklch(0.524 0.1259 263);
 }
 
 @layer base {

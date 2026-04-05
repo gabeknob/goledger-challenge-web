@@ -1,10 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import {
-  EpisodeDetailPage,
-  EpisodeParamError,
-  parseEpisodeParam,
-} from "#/pages/_auth/shows/EpisodeDetailPage";
+import { parseEpisodeParam } from "#/lib/episode";
+import { EpisodeDetailPage, EpisodeParamError } from "#/pages/_auth/shows/EpisodeDetailPage";
 
 export const Route = createFileRoute("/_auth/shows/$showId/episodes/$episode")({
   beforeLoad: ({ params }) => {

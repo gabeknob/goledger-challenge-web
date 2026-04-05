@@ -8,6 +8,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
+import { buildEpisodeParam } from "#/lib/episode";
 import { DeleteEpisodeDialog } from "#/components/DeleteEpisodeDialog";
 import { EpisodeFormDialog } from "#/components/EpisodeFormDialog";
 import { RouteErrorState } from "#/components/RouteErrorState";
@@ -23,8 +24,8 @@ import {
 import { useTMDBEpisodeStill } from "#/hooks/useTMDB";
 import type { EpisodeHistoryEntry } from "#/types/episode";
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const episodeDetailRouteApi = getRouteApi("/_auth/shows/$showId/episodes/$episode");
-const EPISODE_PARAM_PATTERN = /^s(\d+)e(\d+)$/i;
 
 export function EpisodeDetailPage() {
   const { showId } = episodeDetailRouteApi.useParams();
@@ -199,7 +200,7 @@ function EpisodeHeader({
           src={stillUrl}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 size-full object-cover blur-sm opacity-60"
+          className="absolute inset-0 size-full object-cover opacity-60 blur-sm"
         />
       ) : null}
       <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-background/55 to-background" />
@@ -222,7 +223,7 @@ function EpisodeHeader({
 
         <div className="flex flex-col gap-4 pb-1">
           <div className="space-y-3">
-            <p className="text-xs font-semibold tracking-[0.24em] uppercase text-white/75">
+            <p className="text-xs font-semibold tracking-[0.24em] text-white/75 uppercase">
               Episode Detail
             </p>
             {isLoading ? <Skeleton className="h-12 w-2/3 bg-background/20" /> : null}
@@ -279,7 +280,7 @@ function EpisodeDescriptionCard({
 }) {
   return (
     <section className="rounded-4xl border border-border bg-card/80 p-6">
-      <p className="text-xs font-semibold tracking-[0.24em] uppercase text-muted-foreground">
+      <p className="text-xs font-semibold tracking-[0.24em] text-muted-foreground uppercase">
         Synopsis
       </p>
       {isLoading ? (
@@ -314,7 +315,7 @@ function EpisodeMetaCard({
 }) {
   return (
     <section className="rounded-4xl border border-border bg-card/80 p-6">
-      <p className="text-xs font-semibold tracking-[0.24em] uppercase text-muted-foreground">
+      <p className="text-xs font-semibold tracking-[0.24em] text-muted-foreground uppercase">
         Metadata
       </p>
 
@@ -359,7 +360,7 @@ function MetaRow({
 }) {
   return (
     <div className="rounded-3xl border border-border/70 bg-background/60 px-4 py-3">
-      <dt className="text-[0.7rem] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
+      <dt className="text-[0.7rem] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
         {label}
       </dt>
       <dd className="mt-2 flex items-center gap-2 text-sm font-medium text-foreground">
@@ -393,7 +394,7 @@ function EpisodeHistoryPanel({
         onClick={() => onOpenChange(!open)}
       >
         <div>
-          <p className="text-xs font-semibold tracking-[0.24em] uppercase text-muted-foreground">
+          <p className="text-xs font-semibold tracking-[0.24em] text-muted-foreground uppercase">
             Blockchain History
           </p>
           <p className="mt-2 text-sm text-foreground/85">
@@ -439,14 +440,14 @@ function HistoryEntryCard({ entry }: { entry: EpisodeHistoryEntry }) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[0.65rem] font-semibold tracking-[0.16em] uppercase text-primary">
+            <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[0.65rem] font-semibold tracking-[0.16em] text-primary uppercase">
               {entry._isDelete ? "deleteAsset" : (entry["@lastTx"] ?? "unknown")}
             </span>
             <span className="text-xs text-muted-foreground">
               {formatDateTime(entry._timestamp)}
             </span>
           </div>
-          <p className="mt-3 break-words text-xs font-medium text-muted-foreground">
+          <p className="mt-3 text-xs font-medium break-words text-muted-foreground">
             TX {entry._txId}
           </p>
         </div>
@@ -489,7 +490,7 @@ function HistorySkeleton() {
 export function EpisodeParamError() {
   return (
     <main className="mx-auto flex min-h-[60svh] max-w-xl flex-col items-center justify-center px-4 text-center">
-      <p className="text-[0.7rem] font-semibold tracking-[0.24em] uppercase text-muted-foreground">
+      <p className="text-[0.7rem] font-semibold tracking-[0.24em] text-muted-foreground uppercase">
         Invalid Episode URL
       </p>
       <h1 className="display-title mt-4 text-3xl font-bold text-foreground">
@@ -503,27 +504,6 @@ export function EpisodeParamError() {
       </Button>
     </main>
   );
-}
-
-export function parseEpisodeParam(value: string) {
-  const match = EPISODE_PARAM_PATTERN.exec(value);
-
-  if (!match) {
-    throw new Error('Episode URL must follow the "s3e10" format.');
-  }
-
-  const seasonNumber = Number(match[1]);
-  const episodeNumber = Number(match[2]);
-
-  return {
-    episodeNumber,
-    label: buildEpisodeParam(seasonNumber, episodeNumber).toUpperCase(),
-    seasonNumber,
-  };
-}
-
-function buildEpisodeParam(seasonNumber: number, episodeNumber: number) {
-  return `s${seasonNumber}e${episodeNumber}`;
 }
 
 function formatDate(value?: string) {

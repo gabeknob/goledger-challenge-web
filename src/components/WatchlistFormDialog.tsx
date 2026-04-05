@@ -23,6 +23,7 @@ interface WatchlistFormDialogProps {
   existingWatchlists: Watchlist[];
   mode: "create" | "edit";
   onOpenChange: (open: boolean) => void;
+  onSubmitted?: (title: string) => void;
   open: boolean;
   watchlist?: Watchlist | null;
 }
@@ -31,6 +32,7 @@ export function WatchlistFormDialog({
   existingWatchlists,
   mode,
   onOpenChange,
+  onSubmitted,
   open,
   watchlist,
 }: WatchlistFormDialogProps) {
@@ -64,6 +66,7 @@ export function WatchlistFormDialog({
       }
 
       onOpenChange(false);
+      onSubmitted?.(values.title);
     } catch (error) {
       toast.error(
         getApiErrorMessage(

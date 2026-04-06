@@ -161,7 +161,7 @@ function CarouselSection({
         to="/shows/$showId"
         params={{ showId: encodeURIComponent(activeShow.title) }}
         search={{ season: undefined }}
-        className="relative block min-h-[24rem] md:min-h-[30rem]"
+        className="relative block min-h-96 md:min-h-120"
       >
         <div className={`absolute inset-0 ${getCarouselTone(activeShow.title)}`}>
           {imageUrl ? (
@@ -177,9 +177,9 @@ function CarouselSection({
         <div className="absolute inset-0 bg-linear-to-t from-black/84 via-black/60 to-black/38 md:from-black/96 md:via-black/20 md:to-transparent dark:from-background/84 dark:via-background/60 dark:to-background/38 dark:md:from-card/96 dark:md:via-card/20 dark:md:to-transparent" />
         <div className="absolute inset-0 bg-black/25 md:bg-black/35 dark:bg-black/18 dark:md:bg-black/15" />
 
-        <div className="relative flex min-h-[24rem] flex-col justify-between p-6 md:min-h-[30rem] md:p-8">
+        <div className="relative flex min-h-96 flex-col justify-between p-6 md:min-h-120 md:p-8">
           <div className="max-w-2xl space-y-4">
-            <p className="text-xs font-semibold tracking-[0.24em] text-muted uppercase">
+            <p className="text-xs font-semibold tracking-[0.24em] text-muted uppercase dark:text-foreground">
               Recently Added
             </p>
             <h1 className="display-title text-4xl font-bold text-white text-shadow-sm md:text-6xl">
@@ -342,7 +342,7 @@ function HorizontalWatchlistsSection({
             ))}
             {hasMoreWatchlists ? (
               <Card className="w-[18rem] shrink-0 snap-start overflow-hidden rounded-4xl border border-dashed border-border bg-card/80 pt-0 transition-shadow hover:shadow-md">
-                <Link to="/watchlists" className="flex h-[22.5rem] flex-col p-5">
+                <Link to="/watchlists" className="flex h-90 flex-col p-5">
                   <div className="flex flex-1 flex-col justify-between gap-4">
                     <div className="space-y-2">
                       <p className="text-xs font-semibold tracking-[0.22em] text-muted-foreground uppercase">
@@ -429,10 +429,10 @@ function HomeShowCard({ show }: { show: TvShow }) {
       to="/shows/$showId"
       params={{ showId: encodeURIComponent(show.title) }}
       search={{ season: undefined }}
-      className="group w-[11rem] shrink-0"
+      className="group w-44 shrink-0"
     >
       <div className="overflow-hidden rounded-[1.5rem] border border-border bg-card shadow-sm transition-transform duration-200 group-hover:-translate-y-1">
-        <div className={`relative aspect-[2/3] ${getCarouselTone(show.title)}`}>
+        <div className={`relative aspect-2/3 ${getCarouselTone(show.title)}`}>
           {imageUrl ? (
             <img
               src={imageUrl}
@@ -441,7 +441,7 @@ function HomeShowCard({ show }: { show: TvShow }) {
               loading="lazy"
             />
           ) : null}
-          <div className="absolute inset-0 bg-gradient-to-t from-foreground/95 via-foreground/35 to-transparent dark:from-card/95 dark:via-card/35" />
+          <div className="absolute inset-0 bg-linear-to-t from-foreground/95 via-foreground/35 to-transparent dark:from-card/95 dark:via-card/35" />
           <div className="absolute inset-x-0 bottom-0 p-3">
             <p className="line-clamp-2 text-sm font-semibold text-background text-shadow-sm dark:text-foreground">
               {show.title}
@@ -455,7 +455,7 @@ function HomeShowCard({ show }: { show: TvShow }) {
 
 function SeeMoreShowsCard() {
   return (
-    <Card className="aspect-[2/3] w-[11rem] shrink-0 overflow-hidden rounded-[1.5rem] border border-dashed border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+    <Card className="aspect-2/3 w-44 shrink-0 overflow-hidden rounded-[1.5rem] border border-dashed border-border bg-card shadow-sm transition-shadow hover:shadow-md">
       <Link to="/shows" className="flex h-full flex-col justify-between p-4">
         <div className="space-y-2">
           <p className="text-xs font-semibold tracking-[0.22em] text-muted-foreground uppercase">
@@ -478,7 +478,7 @@ function SeeMoreShowsCard() {
 function CarouselSkeleton() {
   return (
     <section className="overflow-hidden rounded-[2rem] border border-border bg-card p-6 shadow-sm">
-      <div className="min-h-[24rem] animate-pulse rounded-[1.5rem] bg-muted/50 md:min-h-[30rem]" />
+      <div className="min-h-96 animate-pulse rounded-[1.5rem] bg-muted/50 md:min-h-120" />
     </section>
   );
 }
@@ -488,8 +488,8 @@ function HorizontalShowSkeletons() {
     <div className="-mx-4 overflow-x-auto px-4">
       <div className="flex gap-4 pb-2">
         {Array.from({ length: 6 }).map((_, index) => (
-          <div key={index} className="w-[11rem] shrink-0">
-            <Skeleton className="aspect-[2/3] rounded-[1.5rem]" />
+          <div key={index} className="w-44 shrink-0">
+            <Skeleton className="aspect-2/3 rounded-[1.5rem]" />
           </div>
         ))}
       </div>

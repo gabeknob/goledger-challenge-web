@@ -169,7 +169,7 @@ export function ShowDetailPage() {
           </p>
           {showDeletePlan ? (
             <TaskList
-              className="max-h-[22rem] space-y-2 overflow-y-auto text-left"
+              className="max-h-88 space-y-2 overflow-y-auto text-left"
               tasks={showDeletePlan.tasks}
               statuses={showDeleteTaskStatuses}
               showStatusLabel
@@ -205,7 +205,7 @@ export function ShowDetailPage() {
           </p>
           {showRenamePlan ? (
             <TaskList
-              className="max-h-[22rem] space-y-2 overflow-y-auto text-left"
+              className="max-h-88 space-y-2 overflow-y-auto text-left"
               tasks={showRenamePlan.tasks}
               statuses={showRenameTaskStatuses}
               showStatusLabel
@@ -538,10 +538,10 @@ function ShowHero({
           className="absolute inset-0 size-full object-cover opacity-70 blur-sm"
         />
       ) : null}
-      <div className="absolute inset-0 bg-gradient-to-b from-background/5 via-background/35 to-background" />
-      <div className="relative mx-auto flex min-h-[24rem] w-full max-w-7xl flex-col justify-end gap-6 px-4 py-10 md:min-h-[28rem] md:flex-row md:items-end">
+      <div className="to absolute inset-0 bg-linear-to-b from-foreground/5 via-foreground/35 to-foreground dark:from-background/5 dark:via-background/35 dark:to-background" />
+      <div className="relative mx-auto flex min-h-96 w-full max-w-7xl flex-col justify-end gap-6 px-4 py-10 md:min-h-112 md:flex-row md:items-end">
         <div
-          className="h-[var(--mobile-poster-height)] w-[var(--mobile-poster-width)] shrink-0 self-center md:h-[22rem] md:w-[15rem] md:self-auto"
+          className="h-(--mobile-poster-height) w-(--mobile-poster-width) shrink-0 self-center md:h-88 md:w-60 md:self-auto"
           style={mobilePosterStyle}
         >
           {posterUrl ? (
@@ -549,12 +549,12 @@ function ShowHero({
               <img
                 src={posterUrl}
                 alt={`${show?.title ?? fallbackTitle} poster`}
-                className="h-full w-full object-cover md:h-[22rem] md:w-[15rem]"
+                className="h-full w-full object-cover md:h-88 md:w-60"
               />
             </div>
           ) : (
             <div
-              className={`h-full w-full rounded-[1.75rem] border border-background/20 shadow-2xl md:h-[22rem] md:w-[15rem] ${heroTone}`}
+              className={`h-full w-full rounded-[1.75rem] border border-background/20 shadow-2xl md:h-88 md:w-60 ${heroTone}`}
             />
           )}
         </div>

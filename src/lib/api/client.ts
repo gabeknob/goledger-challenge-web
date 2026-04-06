@@ -1,9 +1,10 @@
 import axios from "axios";
 import { toast } from "sonner";
 import { clearCredentials, getCredentials } from "#/lib/auth";
+import { getEnv } from "#/lib/env";
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: getEnv("VITE_API_BASE_URL"),
 });
 
 api.interceptors.request.use(config => {

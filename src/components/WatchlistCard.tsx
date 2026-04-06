@@ -56,7 +56,7 @@ export function WatchlistCard({
       <Link
         to="/watchlists/$title"
         params={{ title: encodeURIComponent(watchlist.title) }}
-        className="flex h-[22.5rem] flex-col"
+        className="flex h-90 flex-col"
       >
         <WatchlistArtwork itemTitles={itemTitles} title={watchlist.title} />
         <CardContent className="relative z-10 flex flex-1 flex-col gap-3 p-4 pt-0">

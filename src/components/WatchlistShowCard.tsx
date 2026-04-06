@@ -41,7 +41,7 @@ export function WatchlistShowCard({ onRemove, show }: WatchlistShowCardProps) {
         search={{ season: undefined }}
         className="flex flex-col"
       >
-        <div className={`relative aspect-[3/4] overflow-hidden ${fallbackTone}`}>
+        <div className={`relative aspect-3/4 overflow-hidden ${fallbackTone}`}>
           {imageUrl ? (
             <img
               src={imageUrl}
@@ -50,9 +50,9 @@ export function WatchlistShowCard({ onRemove, show }: WatchlistShowCardProps) {
               loading="lazy"
             />
           ) : null}
-          <div className="absolute inset-0 bg-linear-to-t from-card/95 via-card/35 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-foreground/95 via-foreground/35 to-transparent dark:from-card/95 dark:via-card/35" />
           <div className="absolute inset-x-0 bottom-0 p-4">
-            <h3 className="line-clamp-2 text-base font-semibold text-white text-shadow-md">
+            <h3 className="line-clamp-2 text-base font-semibold text-background text-shadow-md dark:text-foreground">
               {show.title}
             </h3>
           </div>

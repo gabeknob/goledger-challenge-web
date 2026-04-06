@@ -173,24 +173,24 @@ function CarouselSection({
             />
           ) : null}
         </div>
-        <div className="absolute inset-0 bg-linear-to-r from-background/88 via-background/62 to-background/28 md:from-card/98 md:via-card/78 md:to-card/28" />
-        <div className="absolute inset-0 bg-linear-to-t from-background/84 via-background/60 to-background/38 md:from-card/96 md:via-card/20 md:to-transparent" />
-        <div className="absolute inset-0 bg-black/18 md:bg-black/15" />
+        <div className="absolute inset-0 bg-linear-to-r dark:from-background/88 dark:via-background/62 dark:to-background/28 dark:md:from-card/98 dark:md:via-card/78 dark:md:to-card/28" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/84 via-black/60 to-black/38 md:from-black/96 md:via-black/20 md:to-transparent dark:from-background/84 dark:via-background/60 dark:to-background/38 dark:md:from-card/96 dark:md:via-card/20 dark:md:to-transparent" />
+        <div className="absolute inset-0 bg-black/25 md:bg-black/35 dark:bg-black/18 dark:md:bg-black/15" />
 
         <div className="relative flex min-h-[24rem] flex-col justify-between p-6 md:min-h-[30rem] md:p-8">
           <div className="max-w-2xl space-y-4">
-            <p className="text-xs font-semibold tracking-[0.24em] text-muted-foreground uppercase">
+            <p className="text-xs font-semibold tracking-[0.24em] text-muted uppercase">
               Recently Added
             </p>
-            <h1 className="display-title text-4xl font-bold text-foreground text-shadow-sm md:text-6xl">
+            <h1 className="display-title text-4xl font-bold text-white text-shadow-sm md:text-6xl">
               {activeShow.title}
             </h1>
-            <p className="line-clamp-5 max-w-xl text-sm leading-7 text-foreground text-shadow-sm md:text-base">
+            <p className="line-clamp-5 max-w-xl text-sm leading-7 text-white text-shadow-sm md:text-base">
               {activeShow.description}
             </p>
           </div>
 
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 text-muted dark:text-foreground">
             <div className="flex items-center gap-2">
               <Button
                 type="button"
@@ -233,7 +233,9 @@ function CarouselSection({
                     onActiveIndexChange(index);
                   }}
                   className={`h-2.5 rounded-full transition-all ${
-                    index === activeIndex ? "w-10 bg-foreground" : "w-2.5 bg-foreground/30"
+                    index === activeIndex
+                      ? "w-10 bg-muted dark:bg-foreground"
+                      : "w-2.5 bg-muted/30 dark:bg-foreground/30"
                   }`}
                 >
                   <span className="sr-only">Go to {show.title}</span>
@@ -439,9 +441,9 @@ function HomeShowCard({ show }: { show: TvShow }) {
               loading="lazy"
             />
           ) : null}
-          <div className="absolute inset-0 bg-gradient-to-t from-card/95 via-card/35 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-foreground/95 via-foreground/35 to-transparent dark:from-card/95 dark:via-card/35" />
           <div className="absolute inset-x-0 bottom-0 p-3">
-            <p className="line-clamp-2 text-sm font-semibold text-foreground text-shadow-sm">
+            <p className="line-clamp-2 text-sm font-semibold text-background text-shadow-sm dark:text-foreground">
               {show.title}
             </p>
           </div>

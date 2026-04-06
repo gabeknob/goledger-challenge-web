@@ -32,7 +32,7 @@ export function ShowCard({ show, onEdit, onDelete }: ShowCardProps) {
         search={{ season: undefined }}
         className="flex flex-1 flex-col"
       >
-        <div className={`relative aspect-[2/3] w-full overflow-hidden ${fallbackTone}`}>
+        <div className={`relative aspect-2/3 w-full overflow-hidden ${fallbackTone}`}>
           {imageUrl ? (
             <img
               src={imageUrl}
@@ -41,9 +41,9 @@ export function ShowCard({ show, onEdit, onDelete }: ShowCardProps) {
               loading="lazy"
             />
           ) : null}
-          <div className="absolute inset-0 bg-gradient-to-t from-card/95 via-card/35 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-foreground/95 via-foreground/35 to-transparent dark:from-card/95 dark:via-card/35" />
           <div className="absolute inset-x-0 bottom-0 p-3">
-            <p className="line-clamp-2 text-sm font-semibold text-foreground text-shadow-sm">
+            <p className="line-clamp-2 text-sm font-semibold text-background text-shadow-sm dark:text-foreground">
               {show.title}
             </p>
           </div>

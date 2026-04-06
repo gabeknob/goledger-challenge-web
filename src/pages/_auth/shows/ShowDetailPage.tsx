@@ -577,7 +577,7 @@ function ShowHero({
           ) : null}
         </div>
 
-        <div className="flex flex-wrap gap-2 md:ml-auto md:self-end">
+        <div className="flex flex-wrap gap-2 md:ml-auto md:flex-nowrap md:self-end">
           <Button variant="secondary" onClick={onEdit} disabled={!show}>
             Edit Show
           </Button>

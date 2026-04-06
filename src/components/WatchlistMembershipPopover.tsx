@@ -29,6 +29,7 @@ export function WatchlistMembershipPopover({ show }: WatchlistMembershipPopoverP
   const [creatingWatchlist, setCreatingWatchlist] = useState(false);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [pendingTitle, setPendingTitle] = useState<string | null>(null);
   const showKey = show?.["@key"];
 
   const filteredWatchlists = useMemo(() => {
@@ -58,6 +59,7 @@ export function WatchlistMembershipPopover({ show }: WatchlistMembershipPopoverP
         ])
       : currentItems.filter(reference => reference["@key"] !== show["@key"]);
 
+    setPendingTitle(title);
     try {
       await updateWatchlist.mutateAsync({
         current: watchlist,
@@ -75,6 +77,8 @@ export function WatchlistMembershipPopover({ show }: WatchlistMembershipPopoverP
       );
     } catch (error) {
       toast.error(getApiErrorMessage(error, "Could not update the watchlist membership."));
+    } finally {
+      setPendingTitle(null);
     }
   }
 
@@ -111,6 +115,7 @@ export function WatchlistMembershipPopover({ show }: WatchlistMembershipPopoverP
                         <CommandItem
                           key={watchlist["@key"]}
                           className="justify-between"
+                          disabled={pendingTitle === watchlist.title}
                           onClick={() => toggleMembership(watchlist.title, !isChecked)}
                         >
                           <span className="min-w-0 flex-1 truncate font-medium">
@@ -118,12 +123,37 @@ export function WatchlistMembershipPopover({ show }: WatchlistMembershipPopoverP
                           </span>
                           <span
                             className={`flex size-5 shrink-0 items-center justify-center rounded-full border ${
-                              isChecked
-                                ? "border-chart-3/60 bg-chart-3/15 text-chart-3"
-                                : "border-border bg-background text-transparent"
+                              pendingTitle === watchlist.title
+                                ? "border-muted-foreground/40 bg-muted/20 text-muted-foreground"
+                                : isChecked
+                                  ? "border-chart-3/60 bg-chart-3/15 text-chart-3"
+                                  : "border-border bg-background text-transparent"
                             }`}
                           >
-                            <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-3.5" />
+                            {pendingTitle === watchlist.title ? (
+                              <svg
+                                className="size-3.5 animate-spin"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                />
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                />
+                              </svg>
+                            ) : (
+                              <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-3.5" />
+                            )}
                           </span>
                         </CommandItem>
                       );

@@ -1,4 +1,1 @@
-window.__ENV__ = {
-  VITE_API_BASE_URL: "__VITE_API_BASE_URL__",
-  VITE_TMDB_API_KEY: "__VITE_TMDB_API_KEY__",
-};
+window.__ENV__ = {};

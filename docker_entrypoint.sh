@@ -1,7 +1,11 @@
 #!/bin/sh
 set -e
 
-sed -i "s|__VITE_API_BASE_URL__|${VITE_API_BASE_URL}|g" /usr/share/nginx/html/env-config.js
-sed -i "s|__VITE_TMDB_API_KEY__|${VITE_TMDB_API_KEY}|g" /usr/share/nginx/html/env-config.js
+cat > /usr/share/nginx/html/env-config.js <<EOF
+window.__ENV__ = {
+  VITE_API_BASE_URL: "${VITE_API_BASE_URL}",
+  VITE_TMDB_API_KEY: "${VITE_TMDB_API_KEY}"
+};
+EOF
 
 exec "$@"

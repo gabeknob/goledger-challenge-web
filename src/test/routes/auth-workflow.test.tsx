@@ -1,8 +1,11 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import axios from "axios";
 
 import { getCredentials, setCredentials } from "#/lib/auth";
 import { renderAppRoute } from "#/test/test-utils";
+
+vi.mock("axios");
 
 const useShowsMock = vi.fn();
 const useTMDBMock = vi.fn();
@@ -42,6 +45,7 @@ function mockHomeQueriesWithEmptyResults() {
 describe("authentication workflow", () => {
   beforeEach(() => {
     mockHomeQueriesWithEmptyResults();
+    vi.mocked(axios.get).mockResolvedValue({ data: {} });
   });
 
   it("redirects guests from protected routes to login", async () => {

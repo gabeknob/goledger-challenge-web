@@ -24,7 +24,7 @@ VITE_TMDB_API_KEY=<sua chave tmdb>
 
 A chave do TMDB é gratuita e pode ser obtida em [themoviedb.org](https://www.themoviedb.org/settings/api). Sem ela a aplicação funciona normalmente, com gradientes determinísticos no lugar dos posters.
 
-Há uma versão publicada disponível em `[URL]` com todas as variáveis configuradas, para facilitar a avaliação sem precisar rodar localmente.
+Há uma versão publicada disponível em [goledger-tv.us-east-1.elasticbeanstalk.com](http://goledger-tv.us-east-1.elasticbeanstalk.com) com todas as variáveis configuradas, para facilitar a avaliação sem precisar rodar localmente.
 
 ```bash
 pnpm install
@@ -119,5 +119,18 @@ A chave do TMDB está em `VITE_TMDB_API_KEY`, acessível no bundle client-side. 
 
 ## Deploy
 
-- [ ] CI/CD pipeline walkthrough
-- [ ] AWS Elastic Beanstalk setup
+A aplicação roda em um contêiner Docker servido pelo nginx numa instância EC2 single-instance no AWS Elastic Beanstalk (`us-east-1`). O processo é totalmente automatizado via GitHub Actions.
+
+### Pipeline CI/CD
+
+Todo push para `master` dispara o workflow `.github/workflows/deploy.yml`, que executa três etapas em sequência:
+
+1. **Build e push da imagem** — o runner ARM64 (`ubuntu-24.04-arm`) constrói a imagem Docker e faz push para `ghcr.io/gabeknob/goledger-tv:latest` usando o `GITHUB_TOKEN` do próprio repositório. Nenhuma credencial extra é necessária para o registry.
+
+2. **Empacotamento** — o workflow gera um `Dockerrun.aws.json` apontando para a imagem recém-publicada e faz upload do arquivo zipado para o bucket S3 que o Elastic Beanstalk mantém automaticamente na conta.
+
+3. **Deploy** — o workflow cria uma nova application version no EB com o SHA do commit como label e atualiza o ambiente. As variáveis de ambiente (`VITE_API_BASE_URL` e `VITE_TMDB_API_KEY`) são injetadas no ambiente do EB via `--option-settings` a cada deploy, lidas dos GitHub Secrets.
+
+### Injeção de variáveis em runtime
+
+A imagem Docker não carrega as variáveis de ambiente em tempo de build. Em vez disso, o `docker_entrypoint.sh` usa `sed` para substituir os placeholders `__VITE_*__` no arquivo `public/env-config.js` pelos valores reais das variáveis do contêiner antes de iniciar o nginx. Isso permite usar a mesma imagem em qualquer ambiente sem rebuild.

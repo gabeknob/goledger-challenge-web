@@ -59,6 +59,8 @@ Criei duas camadas de acesso às credenciais. A primeira é `lib/auth.ts`, com f
 
 O interceptor do Axios lê o cookie em cada requisição e injeta o header `Authorization`. Na resposta, um segundo interceptor captura status `401`, limpa o cookie e redireciona para `/login`. Erros de rede disparam um toast genérico.
 
+Para validar as credenciais antes de armazená-las, o formulário de login usa o endpoint `GET /query/getHeader` como probe de autenticação. A chamada é feita com raw Axios fora do cliente configurado, para que os interceptors globais não interfiram no fluxo de login. Se a resposta for bem-sucedida, as credenciais são gravadas no cookie e o usuário é redirecionado. Se der 401, o hook expõe `isError` e o formulário exibe a mensagem de erro sem disparar toasts globais.
+
 Em produção, a solução seria diferente: um BFF configuraria o cookie como `HttpOnly` para eliminar a exposição ao JavaScript, e o fluxo de autenticação incluiria refresh tokens para evitar que o usuário precise fazer login novamente a cada expiração de sessão.
 
 ### Sem geração de código (Orval)

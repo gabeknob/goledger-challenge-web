@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link, Outlet, createRootRoute } from "@tanstack/react-router";
 import type { ErrorComponentProps } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
@@ -5,6 +6,7 @@ import { TanStackDevtools } from "@tanstack/react-devtools";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { queryClient } from "#/lib/queryClient";
+import { useThemeStore } from "#/stores/theme";
 import { Button } from "#/components/ui/button";
 
 import "../styles.css";
@@ -36,6 +38,12 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
+  const { theme } = useThemeStore();
+
+  useEffect(() => {
+    document.body.classList.toggle("dark", theme === "dark");
+  }, [theme]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-20">

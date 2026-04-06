@@ -7,6 +7,7 @@ import {
   tmdbSearchResponseSchema,
 } from "#/schemas/tmdb";
 import { useTMDBStore } from "#/stores/tmdb";
+import { getEnv } from "#/lib/env";
 
 type TMDBImageKind = "poster" | "still";
 type TMDBEpisodeStillInput = {
@@ -39,7 +40,7 @@ function buildEpisodeStillCacheKey({
 }
 
 async function fetchTMDBImage(title: string, kind: TMDBImageKind) {
-  if (!import.meta.env.VITE_TMDB_API_KEY?.trim() || !title.trim()) {
+  if (!getEnv("VITE_TMDB_API_KEY").trim() || !title.trim()) {
     return null;
   }
 
@@ -56,7 +57,7 @@ async function fetchTMDBImage(title: string, kind: TMDBImageKind) {
 }
 
 async function fetchTMDBSeriesId(showTitle: string) {
-  if (!import.meta.env.VITE_TMDB_API_KEY?.trim() || !showTitle.trim()) {
+  if (!getEnv("VITE_TMDB_API_KEY").trim() || !showTitle.trim()) {
     return null;
   }
 

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getEnv } from "#/lib/env";
 
 function isBearerToken(value: string) {
   return value.startsWith("eyJ");
@@ -9,7 +10,7 @@ export const tmdbApi = axios.create({
 });
 
 tmdbApi.interceptors.request.use(config => {
-  const tmdbKey = import.meta.env.VITE_TMDB_API_KEY?.trim();
+  const tmdbKey = getEnv("VITE_TMDB_API_KEY").trim();
 
   if (!tmdbKey) {
     return config;
